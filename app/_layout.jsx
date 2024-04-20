@@ -1,10 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-import { SplashScreen } from 'expo-router';
+import { SplashScreen, Stack } from 'expo-router';
 import {Slot} from 'expo-router'
 import { useFonts } from 'expo-font';
 import { useEffect } from 'react';
 
+import GlobalProvider from '../context/GlobalProvider';
 
 SplashScreen.preventAutoHideAsync;
 const _layout = () => {
@@ -35,9 +36,25 @@ const _layout = () => {
       if (!fontsLoaded && !error) {
         return null;
       }
+      return(
+<GlobalProvider>
+      <Stack>
+        <Stack.Screen name="index" options={{
+          headerShown: false
+        }}/>
+         <Stack.Screen name="(auth)" options={{
+          headerShown: false
+        }}/>
+         <Stack.Screen name="(tabs)" options={{
+          headerShown: false
+        }}/>
 
 
-return <Slot/>
+      </Stack>
+      </GlobalProvider>
+      )
+
+
 }
 
 export default _layout
