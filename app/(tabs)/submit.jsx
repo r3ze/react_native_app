@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native'
 import { icons } from "../../constants";
-
+import {router} from "expo-router"
 import {SafeAreaView} from 'react-native-safe-area-context'
 import { DataTable } from 'react-native-paper';
 import FormField from "../../components/FormField"
@@ -9,24 +9,44 @@ import { useState } from 'react'
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import * as DocumentPicker from 'expo-document-picker'
-
+import { createComplaint } from '../../lib/appwrite';
+import { useGlobalContext } from "../../context/GlobalProvider";
 const city = [
   { label: 'Pagsanjan', value: '1' },
   { label: 'Lumban', value: '2' },
   { label: 'Cavinti', value: '3' },
   { label: 'Siniloan', value: '4' },
-
 ];
 
-const pagsanjan_barangay = [
-  { label: 'san isidro', value: '1' },
-  { label: 'uno', value: '2' },
-  { label: 'dos', value: '3' },
-  { label: 'tres', value: '4' },
+const barangays = {
+  '1': [
+    { label: 'san isidro', value: '1' },
+    { label: 'uno', value: '2' },
+    { label: 'dos', value: '3' },
+    { label: 'tres', value: '4' },
+  ],
+  '2': [
+    { label: 'l', value: '1' },
+    { label: 'u', value: '2' },
+    { label: 'm', value: '3' },
+    { label: 'ban', value: '4' },
+  ],
+  '3': [
+    { label: 'c', value: '1' },
+    { label: 'a', value: '2' },
+    { label: 'vin', value: '3' },
+    { label: 'ti', value: '4' },
+  ],
+  '4': [
+    { label: 'si', value: '1' },
+    { label: 'ni', value: '2' },
+    { label: 'lo', value: '3' },
+    { label: 'an', value: '4' },
+  ],
+};
 
-];
 const submit = () => {
-
+  const { setUser } = useGlobalContext();
   const [form, setForm] = useState({
     description: '',
     city: '',
@@ -38,11 +58,22 @@ const submit = () => {
   const [value, setValue] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
 
-  const [streetValue, setStreetValue] = useState(null);
-  const [streetIsFocus, streetSetIsFocus] = useState(false);
 
-  const [barangayValue, barangaySetValue] = useState(null);
-  const [barangayIsFocus, barangaySetIsFocus] = useState(false);
+  
+  const [municipalityValue, setMunicipalityValue] = useState('');
+  const [barangayValue, setBarangayValue] = useState('');
+  const [barangayData, setBarangayData] = useState([]);
+
+  const handleMunicipalityChange = (value) => {
+    setForm({ ...form, city: value });
+    setMunicipalityValue(value);
+    setBarangayData(barangays[value]);
+    // Reset barangay value when municipality changes
+    setBarangayValue('');
+  };
+  const handleBarangayChange = (value) => {
+    setForm({ ...form, barangay: value });
+  };
 
   const openPicker = async (selectType) => {
     const result = await DocumentPicker.getDocumentAsync({
@@ -75,19 +106,21 @@ const submit = () => {
 
   const submitComplaint = async () => {
     if (
-      (form.prompt === "") |
-      (form.title === "") |
-      !form.thumbnail |
-      !form.video
+      (form.description === "") |
+      (form.city === "") |
+      (form.barangay === "") |
+      !form.thumbnail
     ) {
-      return Alert.alert("Please provide all fields");
+      return Alert.alert("Please fill in all fields!");
     }
 
     setUploading(true);
     try {
-      await createVideoPost({
-        ...form,
-        userId: user.$id,
+
+    
+      await createComplaint({
+        ...form, userId: setUser.$id
+
       });
 
       Alert.alert("Success", "Post uploaded successfully");
@@ -96,10 +129,10 @@ const submit = () => {
       Alert.alert("Error", error.message);
     } finally {
       setForm({
-        title: "",
-        video: null,
+        description: "",
+        city: "",
         thumbnail: null,
-        prompt: "",
+        barangay: "",
       });
 
       setUploading(false);
@@ -120,7 +153,7 @@ const submit = () => {
           <FormField
   title="Description"
   value={form.description}
-  handleChangeText={(e) => setform({ ...form, description: e})}
+  handleChangeText={(e) => setForm({ ...form, description: e})}
   otherStyles="mt-7 "
 
   />
@@ -133,6 +166,7 @@ const submit = () => {
           selectedTextStyle={styles.selectedTextStyle}
           inputSearchStyle={styles.inputSearchStyle}
           iconStyle={styles.iconStyle}
+          handleChangeText={(e) => setForm({ ...form, city: e})}
           data={city}
           search
           maxHeight={300}
@@ -140,13 +174,10 @@ const submit = () => {
           valueField="value"
           placeholder={!isFocus ? 'Municipality' : '...'}
           searchPlaceholder="Search..."
-          value={value}
+          value={form.city}
           onFocus={() => setIsFocus(true)}
           onBlur={() => setIsFocus(false)}
-          onChange={item => {
-            setValue(item.value);
-            setIsFocus(false);
-          }}
+          onChange={(item) => handleMunicipalityChange(item.value)}
           renderLeftIcon={() => (
             <AntDesign
               style={styles.icon}
@@ -167,20 +198,14 @@ const submit = () => {
           selectedTextStyle={styles.selectedTextStyle}
           inputSearchStyle={styles.inputSearchStyle}
           iconStyle={styles.iconStyle}
-          data={pagsanjan_barangay}
+          data={barangayData}
           search
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!barangayIsFocus ? 'Barangay' : '...'}
           searchPlaceholder="Search..."
-          value={barangayValue}
-          onFocus={() => barangaySetIsFocus(true)}
-          onBlur={() => barangaySetIsFocus(false)}
-          onChange={item => {
-            barangaySetValue(item.value);
-            barangaySetIsFocus(false);
-          }}
+          value={form.barangay}
+          onChange={(item) => handleBarangayChange(item.value)}
           renderLeftIcon={() => (
             <AntDesign
               style={styles.icon}
@@ -217,7 +242,7 @@ const submit = () => {
           </TouchableOpacity>
         </View>
         <CustomButtons
-          title="Submit & Publish"
+          title="Submit"
           handlePress={submitComplaint}
           containerStyles="mt-7"
           isLoading={uploading}

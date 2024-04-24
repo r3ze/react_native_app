@@ -19,7 +19,7 @@ const SignUp = () => {
   });
 
   const submit = async () => {
-    if(!form.name || !form.email || !form.password||form.accountNumber){
+    if(!form.name || !form.email || !form.password||!form.accountNumber){
       Alert.alert('Error', 'Please fill in all fields')
    
     }
