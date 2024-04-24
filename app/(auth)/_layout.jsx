@@ -1,8 +1,8 @@
 import { View, Text } from 'react-native'
-import {Stack, stack} from 'expo-router'
+import {Redirect, Stack, stack} from 'expo-router'
 import { useGlobalContext } from "../../context/GlobalProvider";
 const Authlayout = () => {
-
+ 
   return (
    <>
    <Stack>
@@ -10,6 +10,11 @@ const Authlayout = () => {
       name = "sign-in"
       options={{headerShown:false}}
       />
+        <Stack.Screen
+      name = "sign-up"
+      options={{headerShown:false}}
+      />
+
 
 
 

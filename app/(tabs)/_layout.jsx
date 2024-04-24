@@ -12,7 +12,7 @@ const TabIcon = ({icon, color, name, focused}) =>{
                 className="w-6 h-6"
             />
             <Text className={`${focused ? 'font-psemibold':
-            'font-pregular'} text-xs`}>{name}</Text>
+            'font-pregular'} text-xs`} style={{color:color}}>{name}</Text>
         </View>
     )
 }
@@ -21,8 +21,12 @@ const TabsLayout = () => {
     <>
     <Tabs screenOptions={{
         tabBarShowLabel:false,
+        tabBarActiveTintColor:'#FFA001',
+        tabBarInactiveTintColor:'#CDCDE0',
         tabBarStyle:{
+            backgroundColor: '#161622',
             borderTopWidth: 1,
+            borderTopColor: '#232533',
             height:84
         }
     }}>
@@ -43,15 +47,15 @@ const TabsLayout = () => {
     }}
 />
 <Tabs.Screen
-    name = "tasks"
+    name = "submit"
     options={{
-        title:'Tasks',
+        title:'Submit',
         headerShown:false,
         tabBarIcon: ({color, focused}) =>(
         <TabIcon
-        icon={icons.tasks}
+        icon={icons.plus}
         color={color}
-        name="Tasks"
+        name="Submit"
         focused={focused}
         />
         )

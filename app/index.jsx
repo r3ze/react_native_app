@@ -8,8 +8,11 @@ import { useGlobalContext } from '../context/GlobalProvider';
 
 export default function App() {
 
-  const {isLoading, isLoggedIn} = useGlobalContext();
-  if(!isLoading && isLoggedIn) return <Redirect href="/home"/>
+  const { setIsLoading, setIsLoggedIn } = useGlobalContext();
+
+  if (!setIsLoading && setIsLoggedIn) return <Redirect href="/submit"/>
+  
+ 
   
   return (  
 
@@ -28,7 +31,7 @@ export default function App() {
            handlePress={() => router.push('/sign-in')}
            containerStyles="w-full mt-7"
            />
-       
+   
     
       </View>
   
