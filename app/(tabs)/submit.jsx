@@ -12,41 +12,41 @@ import * as DocumentPicker from 'expo-document-picker'
 import { createComplaint } from '../../lib/appwrite';
 import { useGlobalContext } from "../../context/GlobalProvider";
 const city = [
-  { label: 'Pagsanjan', value: '1' },
-  { label: 'Lumban', value: '2' },
-  { label: 'Cavinti', value: '3' },
-  { label: 'Siniloan', value: '4' },
+  { label: 'Pagsanjan', value: 'Pagsanjan' },
+  { label: 'Lumban', value: 'Lumban' },
+  { label: 'Cavinti', value: 'Cavinti' },
+  { label: 'Siniloan', value: 'Siniloan' },
 ];
 
 const barangays = {
-  '1': [
-    { label: 'san isidro', value: '1' },
-    { label: 'uno', value: '2' },
-    { label: 'dos', value: '3' },
-    { label: 'tres', value: '4' },
+  'Pagsanjan': [
+    { label: 'san isidro', value: 'san isidro' },
+    { label: 'uno', value: 'uno' },
+    { label: 'dos', value: 'dos' },
+    { label: 'tres', value: 'tres' },
   ],
-  '2': [
-    { label: 'l', value: '1' },
-    { label: 'u', value: '2' },
-    { label: 'm', value: '3' },
-    { label: 'ban', value: '4' },
+  'Lumban': [
+    { label: 'l', value: 'l' },
+    { label: 'u', value: 'u' },
+    { label: 'm', value: 'm' },
+    { label: 'ban', value: 'ban' },
   ],
-  '3': [
-    { label: 'c', value: '1' },
-    { label: 'a', value: '2' },
-    { label: 'vin', value: '3' },
-    { label: 'ti', value: '4' },
+  'Cavinti': [
+    { label: 'c', value: 'c' },
+    { label: 'a', value: 'a' },
+    { label: 'vin', value: 'vin' },
+    { label: 'ti', value: 'ti' },
   ],
-  '4': [
-    { label: 'si', value: '1' },
-    { label: 'ni', value: '2' },
-    { label: 'lo', value: '3' },
-    { label: 'an', value: '4' },
+  'Siniloan': [
+    { label: 'si', value: 'si' },
+    { label: 'ni', value: 'ni' },
+    { label: 'lo', value: 'lo' },
+    { label: 'an', value: 'an' },
   ],
 };
 
 const submit = () => {
-  const { setUser } = useGlobalContext();
+  const { user } = useGlobalContext();
   const [form, setForm] = useState({
     description: '',
     city: '',
@@ -119,9 +119,10 @@ const submit = () => {
 
     
       await createComplaint({
-        ...form, userId: setUser.$id
-
+        ...form, userId: user.$id
+    
       });
+     
 
       Alert.alert("Success", "Post uploaded successfully");
       router.push("/home");
