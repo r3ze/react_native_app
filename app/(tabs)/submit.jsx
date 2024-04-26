@@ -117,9 +117,9 @@ const submit = () => {
     setUploading(true);
     try {
 
-    
+      const currentDate = new Date(); // Get the current date
       await createComplaint({
-        ...form, userId: user.$id
+        ...form, userId: user.$id, createdAt: currentDate
     
       });
      
