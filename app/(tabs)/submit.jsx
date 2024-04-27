@@ -116,10 +116,10 @@ const submit = () => {
 
     setUploading(true);
     try {
-
+   
       const currentDate = new Date(); // Get the current date
       await createComplaint({
-        ...form, userId: user.$id, createdAt: currentDate
+        ...form, userName: user.$id, createdAt: currentDate, consumerName: user.name
     
       });
      
