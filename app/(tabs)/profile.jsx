@@ -1,4 +1,4 @@
-  import { View, Text, FlatList, Image, TouchableOpacity } from 'react-native'
+  import { View, Text, FlatList, Image, TouchableOpacity, ScrollView } from 'react-native'
   import React from 'react'
   import {SafeAreaView} from 'react-native-safe-area-context'
   import { useGlobalContext } from "../../context/GlobalProvider";
@@ -22,6 +22,7 @@
     };
     return (
       <SafeAreaView className="bg-primary">
+    
         <FlatList 
         data={complaints}
         keyExtractor={(item) => item.$id}
@@ -36,9 +37,10 @@
 
         ListHeaderComponent={() => (
           <View className="w-full flex justify-center items-center mt-6 mb-12 px-4">
+            <View className="w-full items-end">
             <TouchableOpacity
               onPress={logout}
-              className="flex w-full items-end mb-10"
+              className="flex  mb-10"
             >
               <Image
                 source={icons.logout}
@@ -46,6 +48,7 @@
                 className="w-6 h-6"
               />
             </TouchableOpacity>
+            </View>
 
             <Image
                 source={icons.fleco}
@@ -61,6 +64,7 @@
           </View>
         )}
         />
+
       </SafeAreaView>
     )
   }

@@ -79,7 +79,7 @@ const submit = () => {
     const result = await DocumentPicker.getDocumentAsync({
       type:
         selectType === "image"
-          ? ["image/png", "image/jpg"]
+          ? ["image/png", "image/jpg", "image/jpeg"]
           : ["video/mp4", "video/gif"],
     });
 
@@ -91,12 +91,7 @@ const submit = () => {
         });
       }
 
-      if (selectType === "video") {
-        setForm({
-          ...form,
-          video: result.assets[0],
-        });
-      }
+ 
     } else {
       setTimeout(() => {
         Alert.alert("Document picked", JSON.stringify(result, null, 2));
@@ -124,7 +119,7 @@ const submit = () => {
       });
      
 
-      Alert.alert("Success", "Post uploaded successfully");
+      Alert.alert("Success", "Complaint submitted successfully");
       router.push("/home");
     } catch (error) {
       Alert.alert("Error", error.message);
