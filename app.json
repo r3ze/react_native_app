@@ -2,7 +2,7 @@
   "expo": {
     "name": "Crew",
     "scheme": "crew",
-    "slug": "crew",
+    "slug": "fleco",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -30,6 +30,21 @@
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "df4a0503-24bb-4512-8721-d5df35d2969a"
+      }
+    },
+    "owner": "aw10",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/df4a0503-24bb-4512-8721-d5df35d2969a"
+    }
   }
 }
