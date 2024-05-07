@@ -16,32 +16,88 @@ const city = [
   { label: 'Lumban', value: 'Lumban' },
   { label: 'Cavinti', value: 'Cavinti' },
   { label: 'Siniloan', value: 'Siniloan' },
+  { label: 'Kalayaan', value: 'Kalayaan' },
+  { label: 'Paete', value: 'Paete' },
+  { label: 'Pakil', value: 'Pakil' },
+  { label: 'Pangil', value: 'Pangil' },
+  { label: 'Mabitac', value: 'Mabitac' },
+  { label: 'Famy', value: 'Famy' },
+  { label: 'Sta. Maria', value: 'Sta. Maria' },
 ];
 
 const barangays = {
   'Pagsanjan': [
-    { label: 'san isidro', value: 'san isidro' },
-    { label: 'uno', value: 'uno' },
-    { label: 'dos', value: 'dos' },
-    { label: 'tres', value: 'tres' },
+    { label: 'San Isidro', value: 'San Isidro' },
+    { label: 'Maulawin', value: 'Maulawin' },
+    { label: 'Barangay I', value: 'Barangay I' },
+    { label: 'Barangay II', value: 'Barangay II' },
+    { label: 'Biñan', value: 'Biñan' },
+    { label: 'Buboy', value: 'Buboy' },
+    { label: 'Cabanbanan', value: 'Cabanbanan' },
+    { label: 'Calusiche', value: 'Calusiche' },
+    { label: 'Dingin', value: 'Dingin' },
+    { label: 'Lambac', value: 'Lambac' },
+
   ],
   'Lumban': [
-    { label: 'l', value: 'l' },
-    { label: 'u', value: 'u' },
-    { label: 'm', value: 'm' },
-    { label: 'ban', value: 'ban' },
+    { label: 'Bagong Silang', value: 'Bagong Silang' },
+    { label: 'Balimbingan', value: 'Balimbingan' },
+    { label: 'Balubad', value: 'Balubad' },
+    { label: 'Caliraya', value: 'Caliraya' },
   ],
   'Cavinti': [
-    { label: 'c', value: 'c' },
-    { label: 'a', value: 'a' },
-    { label: 'vin', value: 'vin' },
-    { label: 'ti', value: 'ti' },
+    { label: 'Anglas', value: 'Anglas' },
+    { label: 'Bangco', value: 'Bangco' },
+    { label: 'Bukal', value: 'Bukal' },
+    { label: 'Bulajo', value: 'Bulajo' },
   ],
   'Siniloan': [
-    { label: 'si', value: 'si' },
-    { label: 'ni', value: 'ni' },
-    { label: 'lo', value: 'lo' },
-    { label: 'an', value: 'an' },
+    { label: 'Acevida', value: 'Acevida' },
+    { label: 'Bagong Pag-asa', value: 'Bagong Pag-asa' },
+    { label: 'Buhay', value: 'Buhay' },
+    { label: 'G. Redor', value: 'G. Redor' },
+  ],
+  'Kalayaan': [
+    { label: 'Acevida', value: 'Acevida' },
+    { label: 'Bagong Pag-asa', value: 'Bagong Pag-asa' },
+    { label: 'Buhay', value: 'Buhay' },
+    { label: 'G. Redor', value: 'G. Redor' },
+  ],
+  'Paete': [
+    { label: 'Bagumbayan', value: 'Bagumbayan' },
+    { label: 'Bangkusay', value: 'Bangkusay' },
+    { label: 'Ermita', value: 'Ermita' },
+    { label: 'Ibaba del Norte', value: 'Ibaba del Norte' },
+  ],
+  'Pakil': [
+    { label: 'Banilan', value: 'Banilan' },
+    { label: 'Baño', value: 'Baño' },
+    { label: 'Burgos', value: 'Burgos' },
+    { label: 'Casa Real', value: 'Casa Real' },
+  ],
+  'Pangil': [
+    { label: 'Balian', value: 'Balian' },
+    { label: 'Dambo', value: 'Dambo' },
+    { label: 'Galalan', value: 'Galalan' },
+    { label: 'Isla', value: 'Isla' },
+  ],
+  'Mabitac': [
+    { label: 'Amuyong', value: 'Amuyong' },
+    { label: 'Bayanihan', value: 'Bayanihan' },
+    { label: 'Lambac', value: 'Lambac' },
+    { label: 'Libis ng Nayon', value: 'Libis ng Nayon' },
+  ],
+  'Famy': [
+    { label: 'Asana', value: 'Asana' },
+    { label: 'Bacong-Sigsigan', value: 'Bacong-Sigsigan' },
+    { label: 'Bagong Pag-asa', value: 'Bagong Pag-asa' },
+    { label: 'Balitoc', value: 'Balitoc' },
+  ],
+  'Sta. Maria': [
+    { label: 'Adia', value: 'Adia' },
+    { label: 'Bagong Pook', value: 'Bagong Pook' },
+    { label: 'Bagumbayan', value: 'Bagumbayan' },
+    { label: 'Barangay I', value: 'Barangay I' },
   ],
 };
 
@@ -200,6 +256,7 @@ const submit = () => {
           labelField="label"
           valueField="value"
           searchPlaceholder="Search..."
+          placeholder={!isFocus ? 'Barangay' : '...'}
           value={form.barangay}
           onChange={(item) => handleBarangayChange(item.value)}
           renderLeftIcon={() => (

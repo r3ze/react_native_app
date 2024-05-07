@@ -27,12 +27,11 @@ const SignUp = () => {
     try {
       const result = await createUser(form.email, form.password, form.name, form.accountNumber)
       setUser(result);
-      setIsLoggedIn(true);
 
-      router.replace("/home")
+
     } catch (error) {
       Alert.alert('Error', error.message)
-      router.replace("/home")
+
     } finally{
       setSubmitting(false)
     }

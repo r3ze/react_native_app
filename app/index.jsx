@@ -8,9 +8,9 @@ import { useGlobalContext } from '../context/GlobalProvider';
 
 export default function App() {
 
-  const { setIsLoading, setIsLoggedIn } = useGlobalContext();
+  const { isLoading, isLoggedIn } = useGlobalContext();
 
-  if (!setIsLoading && setIsLoggedIn) return <Redirect href="/submit"/>
+  if (!isLoading && isLoggedIn) return <Redirect href="/submit"/>
   
  
   
