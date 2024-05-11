@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native'
+import { TextInput, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native'
 import { icons } from "../../constants";
 import {router} from "expo-router"
 import {SafeAreaView} from 'react-native-safe-area-context'
@@ -11,6 +11,19 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import * as DocumentPicker from 'expo-document-picker'
 import { createComplaint } from '../../lib/appwrite';
 import { useGlobalContext } from "../../context/GlobalProvider";
+
+  const complaints = [
+    { label: 'No Power', value: 'No Power' },
+    { label: 'Defective Meter', value: 'Defective Meter' },
+    { label: 'Detached Meter', value: 'Detached Meter' },
+    { label: 'Low Voltage', value: 'Low Voltage' },
+    { label: 'No Reading', value: 'No Reading' },
+    { label: 'Loose Connection/ Sparkling of Wire', value: 'Loose Connection/ Sparkling of Wire' },
+    { label: 'Others', value: 'Others' },
+  ];
+
+
+
 const city = [
   { label: 'Pagsanjan', value: 'Pagsanjan' },
   { label: 'Lumban', value: 'Lumban' },
@@ -109,6 +122,8 @@ const submit = () => {
     barangay: '',
     thumbnail: '',
   })
+  
+  const [isOthersSelected, setIsOthersSelected] = useState(false); //for complaints dropdown
 
   const [uploading, setUploading] = useState(false);
   const [value, setValue] = useState(null);
@@ -130,6 +145,11 @@ const submit = () => {
   const handleBarangayChange = (value) => {
     setForm({ ...form, barangay: value });
   };
+  const handleDropdownChange = (value) => {
+    setIsOthersSelected(value === 'Others');
+    setForm({ ...form, description: value });
+  };
+
 
   const openPicker = async (selectType) => {
     const result = await DocumentPicker.getDocumentAsync({
@@ -202,16 +222,54 @@ const submit = () => {
           <Text className="text-2xl text-white font-psemibold">
             Submit Complaint
           </Text>
-          <FormField
-  title="Description"
-  value={form.description}
-  handleChangeText={(e) => setForm({ ...form, description: e})}
-  otherStyles="mt-7 "
 
-  />
-
+            <View className="space-y-2 mt-7">
+               <Text className="text-base text-gray-100 font-pmedium">
+            Select Complaint
+          </Text>
+             <Dropdown
+        className="mt-5"
+        style={[styles.dropdown]}
+        placeholderStyle={styles.placeholderStyle}
+        selectedTextStyle={styles.selectedTextStyle}
+        inputSearchStyle={styles.inputSearchStyle}
+        iconStyle={styles.iconStyle}
+        handleChangeText={handleDropdownChange}
+        data={complaints}
+        search
+        maxHeight={300}
+        labelField="label"
+        valueField="value"
+        placeholder={!isFocus ? 'Complaints' : '...'}
+        searchPlaceholder="Search..."
+        value={form.description}
+        onFocus={() => setIsFocus(true)}
+        onBlur={() => setIsFocus(false)}
+        onChange={(item) => handleDropdownChange(item.value)}
+        renderLeftIcon={() => (
+          <AntDesign
+            style={styles.icon}
+            color={isFocus ? 'blue' : 'back'}
+            name="Safety"
+            size={20}
+          />
+        )}
+      />
+      {isOthersSelected && (
+        <FormField
+          title="Description"
+          value={form.description}
+          handleChangeText={(e) => setForm({ ...form, description: e})}
+          otherStyles="mt-7 "
+          // Other styles you need
+        />
+      )}
+<View className="">
+ <Text className="text-base text-gray-100 font-pmedium mt-4">
+            Select Municipality
+          </Text>
 <Dropdown
-          className="mt-5"
+          className="mt-2"
           
           style={[styles.dropdown]}
           placeholderStyle={styles.placeholderStyle}
@@ -239,11 +297,15 @@ const submit = () => {
             />
           )}
         />
-
-
+        </View>
+    
+    <View>
+     <Text className="text-base text-gray-100 font-pmedium mt-4">
+            Select Barangay
+          </Text>
      
      <Dropdown
-          className="mt-5"
+          className="mt-2"
           
           style={[styles.dropdown]}
           placeholderStyle={styles.placeholderStyle}
@@ -268,10 +330,18 @@ const submit = () => {
             />
           )}
         />
+        </View>
+</View>
+
         <View className="mt-7 space-y-2">
+        <View className="flex flex-row justify-between items-center">
           <Text className="text-base text-gray-100 font-pmedium">
             Upload photo
           </Text>
+          <Text className=" text-secondary font-pmedium text-xs ">
+            maximum file size: 50 MB
+          </Text>
+          </View>
           <TouchableOpacity onPress={() => openPicker("image")}>
             {form.thumbnail ? (
               <Image
