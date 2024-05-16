@@ -53,7 +53,7 @@ const SignIn = () => {
         </View>
    <View className ="px-3">
    <FormField
-  title="Email"
+  title="Email or Account Number"
   value={form.email}
   handleChangeText={(e) => setForm({ ...form, email: e})}
   otherStyles="mt-7"
