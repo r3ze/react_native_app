@@ -13,6 +13,8 @@ import eye from "../assets/icons/eye.png";
 import play from "../assets/icons/play.png";
 import tasks from "../assets/icons/tasks.png";
 import fleco from "../assets/icons/FLECO logo.png";
+import notification from "../assets/icons/notification.png"
+import repair from "../assets/icons/repair.png"
 export default {
   play,
   bookmark,
@@ -28,5 +30,7 @@ export default {
   eyeHide,
   eye,
   tasks,
-  fleco
+  fleco,
+  notification,
+  repair
 };

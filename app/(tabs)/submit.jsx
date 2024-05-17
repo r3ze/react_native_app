@@ -119,6 +119,7 @@ const submit = () => {
     city: '',
     barangay: '',
     thumbnail: '',
+    street: '',
   });
   
   const [isOthersSelected, setIsOthersSelected] = useState(false); //for complaints dropdown
@@ -219,8 +220,7 @@ const submit = () => {
     if (
       (form.description === "") |
       (form.city === "") |
-      (form.barangay === "") |
-      !form.thumbnail
+      (form.barangay === "") 
     ) {
       return Alert.alert("Please fill in all fields!");
     }
@@ -356,6 +356,12 @@ const submit = () => {
                     size={20}
                   />
                 )}
+              />
+              <FormField
+                title="House / Block / Lot No. / Street / Subdivision"
+                value={form.street}
+                handleChangeText={(e) => setForm({ ...form, street: e })}
+                otherStyles="mt-7 text-lg"
               />
             </View>
           </View>
