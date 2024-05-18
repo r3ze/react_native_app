@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Image, RefreshControl } from 'react-native'
+import { View, Text, FlatList, Image, RefreshControl, TouchableOpacity } from 'react-native'
 import React, { useEffect } from 'react'
 import {SafeAreaView} from 'react-native-safe-area-context'
 import {icons} from "../../constants"
@@ -6,7 +6,7 @@ import { useGlobalContext } from "../../context/GlobalProvider";
 import useAppwrite from '../../lib/useAppwrite';
 import { getUserComplaints} from "../../lib/appwrite";
 import { useState } from "react";
-
+import { useNavigation } from '@react-navigation/native';
 // Function to format the date
 function formatDate(createdAt) {
   const createdAtDate = new Date(createdAt);
@@ -40,6 +40,7 @@ const home = () => {
   );
 
   const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation();
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -48,28 +49,24 @@ const home = () => {
   };
   return (
     <SafeAreaView className="bg-primary h-full ">
-  
-       <FlatList 
+    <FlatList 
         data={complaints}
         keyExtractor={(item) => item.$id}
-        renderItem={({item}) => (
-          <View className="px-4">
-
-          <View className="w-full mt-3 h-16 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
-         
-          <View className="flex justify-center px-4 w-3/5">
-          <Text className="text text-secondary font-pmedium">{item.description}</Text>
-          </View>
-
-          <View className=" justify-end items-end mb-2 px-4 w-2/5">
-          <Text className="text text-gray-100">{formatDate(item.createdAt)}</Text>
-          <Text className="text text-white">{item.status}</Text>
-          </View>
-
-          </View>
-          </View>
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => navigation.navigate('screens/ComplaintDetails', { complaint: item })}>
+            <View className="px-4">
+              <View className="w-full mt-3 h-16 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
+                <View className="flex justify-center px-4 w-3/5">
+                  <Text className="text text-secondary font-pmedium">{item.description}</Text>
+                </View>
+                <View className=" justify-end items-end mb-2 px-4 w-2/5">
+                  <Text className="text text-gray-100">{formatDate(item.createdAt)}</Text>
+                  <Text className="text text-white">{item.status}</Text>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
         )}
-        
 
       ListHeaderComponent={() =>(
         <View className="my-6 px-4 space-y-6">
