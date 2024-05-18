@@ -1,46 +1,57 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import StepIndicator from 'react-native-step-indicator';
 
-const Stepper = ({ status }) => {
-  const steps = [
-    'Complaint Received',
-    'Resolution Team On The Way',
-    'Complaint Resolved',
-  ];
+const labels = ["Complaint Received", "Resolution Team On The Way", "Complaint Resolved"];
 
-  const getStatusIndex = (status) => {
-    switch (status.toLowerCase()) {
-      case 'received':
-        return 0;
-      case 'on the way':
-        return 1;
-      case 'resolved':
-        return 2;
-      default:
-        return 0;
-    }
-  };
+const customStyles = {
+  
+  stepIndicatorSize: 30,
+  currentStepIndicatorSize: 40,
+  separatorStrokeWidth: 2,
+  currentStepStrokeWidth: 3,
+  stepStrokeCurrentColor: '#FFA001',
+  stepStrokeWidth: 3,
+  stepStrokeFinishedColor: '#FFA001',
+  stepStrokeUnFinishedColor: '#aaaaaa',
+  separatorFinishedColor: '#FFA001',
+  separatorUnFinishedColor: '#aaaaaa',
+  stepIndicatorFinishedColor: '#FFA001',
+  stepIndicatorUnFinishedColor: '#ffffff',
+  stepIndicatorCurrentColor: '#ffffff',
+  stepIndicatorLabelFontSize: 13,
+  currentStepIndicatorLabelFontSize: 13,
+  stepIndicatorLabelCurrentColor: '#FFA001',
+  stepIndicatorLabelFinishedColor: '#ffffff',
+  stepIndicatorLabelUnFinishedColor: '#aaaaaa',
+  labelColor: '#999999',
+  labelSize: 16,
+  currentStepLabelColor: '#FFA001',
+  labelAlign: 'flex-start',
+};
 
-  const currentStep = getStatusIndex(status);
-
+const Stepper = ({ currentPosition }) => {
   return (
-   <View style={{flex: 1}}>
-    <ProgressSteps activeStep={1} activeLabelColor = "#FF9C01" activeStepIconBorderColor = "#FF9C01" completedProgressBarColor = "#FF9C01" completedStepIconColor = "#FF9C01">
-        <ProgressStep label="Complaint Submitted" removeBtnRow={true}  >
-        
-        </ProgressStep>
-        <ProgressStep label="Resolution Team Dispatched"  removeBtnRow={true}>
-         
-        </ProgressStep>
-        <ProgressStep label="Complaint Resolved" removeBtnRow={true}>
-        
-        </ProgressStep>
-    </ProgressSteps>
-</View>
+    <ScrollView contentContainerStyle={styles.container}>
+    
+      <StepIndicator
+        customStyles={customStyles}
+        currentPosition={1}
+        labels={labels}
+        direction="vertical"
+        stepCount={3}
+      />
+   
+    </ScrollView>
   );
 };
 
-
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingVertical: 40,
+    backgroundColor: '#161622',
+  },
+});
 
 export default Stepper;
