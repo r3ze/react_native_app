@@ -22,7 +22,7 @@ const ComplaintDetails = () => {
   return (
     <SafeAreaView className="h-full">
     <View  style={styles.container}>
-      <Text className="text-white mt-5" style={styles.title}>Complaint Details</Text>
+      <Text className="text-white mt-5" style={styles.title}>Track Complaint</Text>
       <Text className="text-gray-100 " style={styles.text}>Ticket ID: {complaint.$id  }</Text>
       <Text className="text-gray-100 " style={styles.text}>Description: {complaint.description}</Text>
       <Text className="text-gray-100 " style={styles.text}>Date: {complaint.createdAt}</Text>
@@ -35,6 +35,7 @@ const ComplaintDetails = () => {
             />
 
           </View>
+          <Text className="text-white mt-5" style={styles.title}>Complaint in Progress</Text>
       <Stepper status={complaint.status} />
     </View>
     

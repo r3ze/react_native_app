@@ -49,7 +49,7 @@ const Stepper = ({ currentPosition }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: 40,
+    paddingVertical: 1,
     backgroundColor: '#161622',
   },
 });

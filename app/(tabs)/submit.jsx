@@ -12,6 +12,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { createComplaint } from '../../lib/appwrite';
 import { useGlobalContext } from "../../context/GlobalProvider";
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 const complaints = [
   { label: 'No Power', value: 'No Power' },
@@ -120,6 +121,7 @@ const submit = () => {
     barangay: '',
     thumbnail: '',
     street: '',
+    details: '',
   });
   
   const [isOthersSelected, setIsOthersSelected] = useState(false); //for complaints dropdown
@@ -218,9 +220,8 @@ const submit = () => {
 
   const submitComplaint = async () => {
     if (
-      (form.description === "") |
-      (form.city === "") |
-      (form.barangay === "") 
+      (form.description === "") 
+    
     ) {
       return Alert.alert("Please fill in all fields!");
     }
@@ -256,7 +257,7 @@ const submit = () => {
         </Text>
         <View className="">
           <View className="space-y-2 mt-7">
-            <Text className="text-base text-gray-100 font-pmedium">
+            <Text className="text-base text-white font-pmedium">
               Select Complaint
             </Text>
             <Dropdown
@@ -295,84 +296,33 @@ const submit = () => {
                 otherStyles="mt-7 "
               />
             )}
-            <View className="">
-              <Text className="text-base text-gray-100 font-pmedium mt-4">
-                Select Municipality
-              </Text>
-              <Dropdown
-                className="mt-2"
-                style={[styles.dropdown]}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                iconStyle={styles.iconStyle}
-                handleChangeText={(e) => setForm({ ...form, city: e })}
-                data={city}
-                search
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                placeholder={!isFocus ? 'Municipality' : '...'}
-                searchPlaceholder="Search..."
-                value={form.city}
-                onFocus={() => setIsFocus(true)}
-                onBlur={() => setIsFocus(false)}
-                onChange={(item) => handleMunicipalityChange(item.value)}
-                renderLeftIcon={() => (
-                  <AntDesign
-                    style={styles.icon}
-                    color={isFocus ? 'blue' : 'back'}
-                    name="Safety"
-                    size={20}
-                  />
-                )}
-              />
-            </View>
+       
             <View>
-              <Text className="text-base text-gray-100 font-pmedium mt-4">
-                Select Barangay
-              </Text>
-              <Dropdown
-                className="mt-2"
-                style={[styles.dropdown]}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                iconStyle={styles.iconStyle}
-                data={barangayData}
-                search
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                searchPlaceholder="Search..."
-                placeholder={!isFocus ? 'Barangay' : '...'}
-                value={form.barangay}
-                onChange={(item) => handleBarangayChange(item.value)}
-                renderLeftIcon={() => (
-                  <AntDesign
-                    style={styles.icon}
-                    color={isFocus ? 'blue' : 'back'}
-                    name="Safety"
-                    size={20}
-                  />
-                )}
-              />
+          
+
               <FormField
-                title="House / Block / Lot No. / Street / Subdivision"
-                value={form.street}
-                handleChangeText={(e) => setForm({ ...form, street: e })}
-                otherStyles="mt-7 text-lg"
+                title="Details you think is important for us to know"
+                value={form.details}
+                handleChangeText={(e) => setForm({ ...form, details: e })}
+                otherStyles="mt-7 "
+                placeholder="Add details"
+                placeholderFontSize={5}
               />
             </View>
           </View>
           <View className="mt-7 space-y-2">
-            <View className="flex flex-row justify-between items-center">
-              <Text className="text-base text-gray-100 font-pmedium">
+            <View className="flex flex-row justify-between items-end">
+              <View className="flex">
+              <Text className="text-base text-white font-pmedium">
                 Upload photo
               </Text>
-              <Text className=" text-secondary font-pmedium text-xs ">
-                maximum file size: 50 MB
+              <Text className="text-gray-100 text-sm" style={{color:'gray'}}>
+                Photos help us to find the best staff and tools for your needs as soon as possible
               </Text>
+           
+             
+              </View>
+        
             </View>
             <TouchableOpacity onPress={() => openImagePickerAsync("image")}>
               {form.thumbnail ? (
@@ -390,17 +340,24 @@ const submit = () => {
                     className="w-5 h-5"
                   />
                   <Text className="text-sm text-gray-100 font-pmedium">
-                    Upload
+                    Upload   
+                    
                   </Text>
                 </View>
               )}
             </TouchableOpacity>
+            <View className="items-end w-full ">
+              <Text className=" text-secondary font-pmedium text-xs ">
+                maximum file size: 50 MB
+              </Text>
+              </View>
           </View>
           <CustomButtons
             title="Submit"
             handlePress={submitComplaint}
             containerStyles="mt-7"
             isLoading={uploading}
+            className="min-h-[62px]"
           />
         </View>
       </ScrollView>

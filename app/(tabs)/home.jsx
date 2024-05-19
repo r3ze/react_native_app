@@ -7,6 +7,8 @@ import useAppwrite from '../../lib/useAppwrite';
 import { getUserComplaints} from "../../lib/appwrite";
 import { useState } from "react";
 import { useNavigation } from '@react-navigation/native';
+import CustomButtons from "../../components/CustomButtons";
+import CustomButton from '../../components/CustomButton';
 // Function to format the date
 function formatDate(createdAt) {
   const createdAtDate = new Date(createdAt);
@@ -42,6 +44,9 @@ const home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
 
+  const handlePress = (item) => {
+    navigation.navigate('screens/ComplaintDetails', { complaint: item });
+  };
   const onRefresh = async () => {
     setRefreshing(true);
     await refetch();
@@ -53,19 +58,41 @@ const home = () => {
         data={complaints}
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => navigation.navigate('screens/ComplaintDetails', { complaint: item })}>
-            <View className="px-4">
-              <View className="w-full mt-3 h-16 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
-                <View className="flex justify-center px-4 w-3/5">
-                  <Text className="text text-secondary font-pmedium">{item.description}</Text>
-                </View>
-                <View className=" justify-end items-end mb-2 px-4 w-2/5">
-                  <Text className="text text-gray-100">{formatDate(item.createdAt)}</Text>
-                  <Text className="text text-white">{item.status}</Text>
-                </View>
-              </View>
+         
+            <View className="mb-5">
+            <View className=" w-full flex-row justify-between px-4 ">
+            <Text className="text text-gray-100 font-pmedium" style={{color:'gray'}}>Ticket ID: {item.$id}</Text>
+            <Text className="text text-gray-100 "style={{color:'gray'}}>In Progress</Text>
             </View>
-          </TouchableOpacity>
+              <View className="w-full mt-3 h-30  flex flex-row justify-between space-x-2">
+                <View className="flex-row justify-center px-4">
+                <View className ="items-center" >
+            <Image
+            source = {{uri: item.image}}
+            className="h-20 w-20"
+            resizeMode='contain'
+            />
+
+          </View>
+
+          <View className="flex">
+                  <Text className=" mt-1 text text-secondary font-pmedium">{item.description}</Text>
+                  <Text className=" mt-1 text text-gray-100 font-pmedium">{item.additionalDetails}</Text>
+                  </View>
+                </View>
+              
+              </View>
+              <View className=" px-4 w-full flex-row justify-end mt-3">
+          
+              <CustomButton
+                title="Track"
+                onPress={() => handlePress(item)}
+              
+              />
+            </View>
+            </View>
+            
+       
         )}
 
       ListHeaderComponent={() =>(
@@ -87,7 +114,7 @@ const home = () => {
           </View>
           
           <View className="items-center w-full">
-          <Text className="text-white font-pbold text-2xl">Active Complaints</Text>
+          <Text className="text-white font-pbold text-2xl">My Complaints</Text>
 
           </View>
           

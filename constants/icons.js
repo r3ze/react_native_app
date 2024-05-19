@@ -15,6 +15,7 @@ import tasks from "../assets/icons/tasks.png";
 import fleco from "../assets/icons/FLECO logo.png";
 import notification from "../assets/icons/notification.png"
 import repair from "../assets/icons/repair.png"
+import avatar from "../assets/icons/user.png"
 export default {
   play,
   bookmark,
@@ -32,5 +33,6 @@ export default {
   tasks,
   fleco,
   notification,
-  repair
+  repair,
+  avatar
 };
