@@ -230,7 +230,8 @@ const submit = () => {
     try {
       const currentDate = new Date();
       await createComplaint({
-        ...form, userName: user.$id, createdAt: currentDate, consumerName: user.name
+        ...form, userName: user.$id, createdAt: currentDate, consumerName: user.name,
+        city: user.city, barangay: user.barangay, street: user.street
       });
 
       Alert.alert("Success", "Complaint submitted successfully");

@@ -12,23 +12,23 @@ const SignUp = () => {
   const { setUser, setIsLoggedIn } = useGlobalContext();
   const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
-    name:"",
-    email: "",
+    email:"",
+    phone: "",
     accountNumber:"",
     password: "",
   });
 
   const submit = async () => {
-    if(!form.name || !form.email || !form.password||!form.accountNumber){
+    if(!form.accountNumber || !form.email || !form.password||!form.phone){
       Alert.alert('Error', 'Please fill in all fields')
    
     }
     setSubmitting(true)
     try {
-      const result = await createUser(form.email, form.password, form.name, form.accountNumber)
+      const result = await createUser(form.email, form.password, form.accountNumber, form.phone)
       setUser(result);
       setIsLoggedIn(true);
-      router.replace("/home")
+      router.replace("/submit")
       Alert.alert('Account created successfully')
 
 
@@ -56,9 +56,9 @@ const SignUp = () => {
    <View className ="px-3">
 
    <FormField
-  title="Name"
-  value={form.name}
-  handleChangeText={(e) => setForm({ ...form, name: e})}
+  title="Account Number"
+  value={form.accountNumber}
+  handleChangeText={(e) => setForm({ ...form, accountNumber: e})}
   otherStyles="mt-7 "
 
   />
@@ -72,9 +72,9 @@ const SignUp = () => {
   />
 
   <FormField
-  title="Account Number"
-  value={form.accountNumber}
-  handleChangeText={(e) => setForm({ ...form, accountNumber: e})}
+  title="Phone"
+  value={form.phone}
+  handleChangeText={(e) => setForm({ ...form, phone: e})}
   otherStyles="mt-7"
  
   />
