@@ -12,6 +12,7 @@ const SignUp = () => {
   const { setUser, setIsLoggedIn } = useGlobalContext();
   const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
+    name: "",
     email:"",
     phone: "",
     accountNumber:"",
@@ -25,7 +26,7 @@ const SignUp = () => {
     }
     setSubmitting(true)
     try {
-      const result = await createUser(form.email, form.password, form.accountNumber, form.phone)
+      const result = await createUser(form.name, form.email, form.password, form.accountNumber, form.phone)
       setUser(result);
       setIsLoggedIn(true);
       router.replace("/submit")
@@ -54,6 +55,14 @@ const SignUp = () => {
       />
         </View>
    <View className ="px-3">
+
+   <FormField
+  title="Name"
+  value={form.name}
+  handleChangeText={(e) => setForm({ ...form, name: e})}
+  otherStyles="mt-7 "
+
+  />
 
    <FormField
   title="Account Number"
