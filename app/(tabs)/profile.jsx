@@ -49,7 +49,9 @@ const Profile = () => {
   if (!user) {
     return (
       <SafeAreaView className="bg-primary h-full flex items-center justify-center">
+        <ScrollView>
         <Text className="text-gray-100">Loading...</Text>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -57,37 +59,45 @@ const Profile = () => {
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
-      <View className="w-full mt-6 mb-5 px-4">
+      <View className="w-full  mb-2 px-4">
         <View className="w-full items-end">
           <TouchableOpacity onPress={logout} className="flex mb-10">
             <Image source={icons.logout} resizeMode="contain" className="w-6 h-6" />
           </TouchableOpacity>
         </View>
-        <View className="w-full flex-row w-4/5 justify-between">
-          <Image source={icons.avatar} resizeMode="contain" className="mr-4 w-20 h-20" />
-          <View className="w-4/5 justify-center">
-          <View className="w-full h-20 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
-          <View className="flex-row justify-between w-full items-center px-4">
-            <View>
-              <Text className="text text-gray-100 font-pmedium">{user.name}</Text>
-              <Text className="text text-gray-100 font-pmedium" style={{ color: 'gray' }}>{user.account_number}</Text>
-              
-            </View>
-          </View>
-        </View>
-          </View>
-        </View>
-        <View className="items-end">
-          <CustomButton title={isEditing ? "Save" : "Edit Profile"} className="mt-3" onPress={toggleEditMode} />
-        </View>
+  
 
   
       </View>
 
+
       <View className="px-4">
+      <Text className="text-xl text-center text-white font-psemibold">
+          Account Information
+        </Text>
+        <Text className="text text-gray-100 font-pmedium">Name</Text>
+        <View className="w-full mt-1 h-16 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
+          <View className="flex-row justify-between w-full items-center px-4">
+            <View>
+              <Text className="text text-gray-100 font-pmedium">{user.name}</Text>
+
+            </View>
+          </View>
+        </View>
+
+        <Text className="text text-gray-100 font-pmedium mt-4">Account number</Text>
+        <View className="w-full mt-1 h-16 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
+          <View className="flex-row justify-between w-full items-center px-4">
+            <View>
+              <Text className="text text-gray-100 font-pmedium">{user.account_number}</Text>
+
+            </View>
+          </View>
+        </View>
       {!isEditing && (
         <>
-        <Text className="text text-gray-100 font-pmedium">Address</Text>
+          
+        <Text className="text text-gray-100 font-pmedium mt-4">Address</Text>
         <View className="w-full mt-1 h-16 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
           <View className="flex-row justify-between w-full items-center px-4">
             <View>
@@ -137,6 +147,7 @@ const Profile = () => {
           </View>
         </View>
 
+      
         
 
 
@@ -172,7 +183,9 @@ const Profile = () => {
               </View>
             </>
           )}
-            
+                <View className="items-end">
+          <CustomButton title={isEditing ? "Save" : "Edit Profile"} className="mt-3" onPress={toggleEditMode} />
+        </View>
       </View>
       </ScrollView>
     </SafeAreaView>

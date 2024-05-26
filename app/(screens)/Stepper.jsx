@@ -2,10 +2,14 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import StepIndicator from 'react-native-step-indicator';
 
-const labels = ["Complaint Received", "Resolution Team On The Way", "Complaint Resolved"];
+const labels = [
+  { date: 'Mon, 19 Oct 20', description: 'Complaint Raised', time: 'Your complaint has been raised at 2:32 PM' },
+  { date: 'Mon, 19 Oct 20', description: 'Task Assigned', time: 'Admin has assigned the task to the crew' },
+  { date: 'Mon, 19 Oct 20', description: 'Resolution Team is Coming', time: 'The resolution team is coming' },
+  { date: 'Mon, 19 Oct 20', description: 'Complaint Resolved', time: 'Complaint was successfully resolved' }
+];
 
 const customStyles = {
-  
   stepIndicatorSize: 30,
   currentStepIndicatorSize: 40,
   separatorStrokeWidth: 2,
@@ -30,18 +34,27 @@ const customStyles = {
   labelAlign: 'flex-start',
 };
 
-const Stepper = ({ currentPosition }) => {
+const Stepper = ({ currentPosition = 4 }) => {
+  const renderLabel = ({ position, stepStatus, label, currentPosition }) => {
+    return (
+      <View style={styles.labelContainer}>
+        <Text style={styles.dateText}>{label.date}</Text>
+        <Text style={styles.descriptionText}>{label.description}</Text>
+        <Text style={styles.timeText}>{label.time}</Text>
+      </View>
+    );
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-    
       <StepIndicator
         customStyles={customStyles}
-        currentPosition={1}
+        currentPosition={currentPosition}
         labels={labels}
         direction="vertical"
-        stepCount={3}
+        stepCount={labels.length}
+        renderLabel={renderLabel}
       />
-   
     </ScrollView>
   );
 };
@@ -51,6 +64,24 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 1,
     backgroundColor: '#161622',
+  },
+  labelContainer: {
+    flex: 1,
+    paddingLeft: 16,
+    paddingVertical: 8,
+  },
+  dateText: {
+    fontSize: 14,
+    color: '#999999',
+  },
+  descriptionText: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  timeText: {
+    fontSize: 14,
+    color: '#999999',
   },
 });
 

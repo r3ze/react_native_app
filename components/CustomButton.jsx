@@ -5,10 +5,11 @@ import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-nat
 const CustomButton = ({ title, onPress, isLoading, style, borderColor, textColor }) => {
   return (
     <TouchableOpacity
+    className="  border-2 border-black-200"
       style={[
         styles.button,
         style,
-        { borderColor: borderColor || '#FF9C01', minHeight: 40 },
+        { minHeight: 40 },
       ]}
       onPress={onPress}
       disabled={isLoading}
@@ -16,7 +17,7 @@ const CustomButton = ({ title, onPress, isLoading, style, borderColor, textColor
       {isLoading ? (
         <ActivityIndicator color={textColor || '#FF9C01'} />
       ) : (
-        <Text style={[styles.buttonText, { color: textColor || '#FF9C01' }]}>{title}</Text>
+        <Text style={[styles.buttonText]} className="text-sm text-gray-100 font-pmedium">{title}</Text>
       )}
     </TouchableOpacity>
   );
@@ -25,15 +26,15 @@ const CustomButton = ({ title, onPress, isLoading, style, borderColor, textColor
 const styles = StyleSheet.create({
   button: {
     width: '47%',
-    backgroundColor: 'transparent',
+   
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
-    borderWidth: 1,
+    borderWidth: 2,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
+   
+ 
   },
 });
 

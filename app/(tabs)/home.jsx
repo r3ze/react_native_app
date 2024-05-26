@@ -59,14 +59,15 @@ const home = () => {
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => (
          
-            <View className="mb-5">
+            <View className="mb-10">
             <View className=" w-full flex-row justify-between px-4 ">
+            <Text className="text text-secondary font-pmedium ">In Progress</Text>
             <Text className="text text-gray-100 font-pmedium" style={{color:'gray'}}>Ticket ID: {item.$id}</Text>
-            <Text className="text text-gray-100 "style={{color:'gray'}}>In Progress</Text>
+            
             </View>
               <View className="w-full mt-3 h-30  flex flex-row justify-between space-x-2">
-                <View className="flex-row justify-center px-4">
-                <View className ="items-center" >
+                <View className="flex-row  px-4">
+                <View className =" w-1/5 mr-2" >
             <Image
             source = {{uri: item.image}}
             className="h-20 w-20"
@@ -75,17 +76,20 @@ const home = () => {
 
           </View>
 
-          <View className="flex">
-                  <Text className=" mt-1 text text-secondary font-pmedium">{item.description}</Text>
-                  <Text className=" mt-1 text text-gray-100 font-pmedium">{item.additionalDetails}</Text>
+          <View className="flex w-4/5">
+                  <Text className=" mt-1 text text-white font-pmedium">{item.description}</Text>
+                  <Text className=" mt-1 text text-gray-100 font-pmedium" style={{color:'gray'}}>{item.additionalDetails}</Text>
                   </View>
                 </View>
               
               </View>
-              <View className=" px-4 w-full flex-row justify-end mt-3">
-          
+              <View className=" px-4 w-full flex-row justify-around mt-3">
               <CustomButton
-                title="Track"
+                title="WITHDRAW"
+              
+              />
+              <CustomButton
+                title="TRACK"
                 onPress={() => handlePress(item)}
               
               />
@@ -100,7 +104,6 @@ const home = () => {
           <View className="justify-between items-start flex-row mb-6">
           <View>
             <Text className="font-pmedium text-sm text-gray-100">Welcome Back</Text>
-            <Text className="text-2xl font-psemibold text-white">Danzel</Text>
           </View>
           <View className="">
             <Image

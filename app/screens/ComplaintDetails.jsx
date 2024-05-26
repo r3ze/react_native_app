@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useEffect } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import Stepper from '../(screens)/Stepper'
 import { useNavigation } from '@react-navigation/native';
@@ -21,10 +21,12 @@ const ComplaintDetails = () => {
 
   return (
     <SafeAreaView className="h-full">
+      <ScrollView>
     <View  style={styles.container}>
-      <Text className="text-white mt-5" style={styles.title}>Track Complaint</Text>
+      <Text className="text-white mt-1" style={styles.title}>Track Complaint</Text>
       <Text className="text-gray-100 " style={styles.text}>Ticket ID: {complaint.$id  }</Text>
-      <Text className="text-gray-100 " style={styles.text}>Description: {complaint.description}</Text>
+      <Text className="text-gray-100 " style={styles.text}>Complaint Type: {complaint.description}</Text>
+      <Text className="text-gray-100 " style={styles.text}>Details: {complaint.additionalDetails}</Text>
       <Text className="text-gray-100 " style={styles.text}>Date: {complaint.createdAt}</Text>
       
       <View className ="items-center mt-5" >
@@ -35,10 +37,11 @@ const ComplaintDetails = () => {
             />
 
           </View>
-          <Text className="text-white mt-5" style={styles.title}>Complaint in Progress</Text>
+          <Text className="text-white mt-5" style={styles.title}>Complaint Resolved</Text>
+          
       <Stepper status={complaint.status} />
     </View>
-    
+    </ScrollView>
     </SafeAreaView>
   );
 };
