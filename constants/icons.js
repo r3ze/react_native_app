@@ -16,6 +16,7 @@ import fleco from "../assets/icons/FLECO logo.png";
 import notification from "../assets/icons/notification.png"
 import repair from "../assets/icons/repair.png"
 import avatar from "../assets/icons/user.png"
+import map from "../assets/icons/map.png"
 export default {
   play,
   bookmark,
@@ -34,5 +35,6 @@ export default {
   fleco,
   notification,
   repair,
-  avatar
+  avatar,
+  map
 };

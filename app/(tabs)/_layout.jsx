@@ -30,7 +30,21 @@ const TabsLayout = () => {
             height:84
         }
     }}>
-        
+         <Tabs.Screen
+    name = "map"
+    options={{
+        title:'Map',
+        headerShown:false,
+        tabBarIcon: ({color, focused}) =>(
+        <TabIcon
+        icon={icons.map}
+        color={color}
+        name="Map"
+        focused={focused}
+        />
+        )
+    }}
+/>
     <Tabs.Screen
     name = "home"
     options={{

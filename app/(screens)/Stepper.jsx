@@ -3,10 +3,10 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import StepIndicator from 'react-native-step-indicator';
 
 const labels = [
-  { date: 'Mon, 19 Oct 20', description: 'Complaint Raised', time: 'Your complaint has been raised at 2:32 PM' },
-  { date: 'Mon, 19 Oct 20', description: 'Task Assigned', time: 'Admin has assigned the task to the crew' },
-  { date: 'Mon, 19 Oct 20', description: 'Resolution Team is Coming', time: 'The resolution team is coming' },
-  { date: 'Mon, 19 Oct 20', description: 'Complaint Resolved', time: 'Complaint was successfully resolved' }
+  { date: 'Mon, Mar 20', description: 'Complaint Raised', time: 'Your complaint has been raised at 2:32 PM' },
+  { date: 'Mon, Mar 20', description: 'Task Assigned', time: 'Admin has assigned the task to the crew' },
+  { date: 'Mon, Mar 20', description: 'Resolution Team is Coming', time: 'The resolution team is coming' },
+  { date: 'Mon, Mar 20', description: 'Complaint Resolved', time: 'Complaint was successfully resolved' }
 ];
 
 const customStyles = {
@@ -34,7 +34,7 @@ const customStyles = {
   labelAlign: 'flex-start',
 };
 
-const Stepper = ({ currentPosition = 4 }) => {
+const Stepper = ({ currentPosition = 3 }) => {
   const renderLabel = ({ position, stepStatus, label, currentPosition }) => {
     return (
       <View style={styles.labelContainer}>

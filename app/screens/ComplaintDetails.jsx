@@ -4,6 +4,7 @@ import { useRoute } from '@react-navigation/native';
 import Stepper from '../(screens)/Stepper'
 import { useNavigation } from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context'
+import CustomButton from '../../components/CustomButton';
 const ComplaintDetails = () => {
   const route = useRoute();
   const navigation = useNavigation();
@@ -19,15 +20,44 @@ const ComplaintDetails = () => {
     console.log('Complaint Image URL:', complaint.image); // Log the image URL to ensure it is correct
   }, [complaint]);
 
+
+  // Function to format the date
+function formatDate(createdAt) {
+  const createdAtDate = new Date(createdAt);
+  const currentDate = new Date();
+
+  const diffInDays = (currentDate - createdAtDate) / (1000 * 60 * 60 * 24);
+
+  if (diffInDays < 1 && currentDate.getDate() === createdAtDate.getDate()) {
+      return 'today ' + formatTime(createdAtDate);
+  } else if (diffInDays < 2 && currentDate.getDate() - createdAtDate.getDate() === 1) {
+      return 'yesterday ' + formatTime(createdAtDate);
+  } else {
+      const options = { weekday: 'long', hour: 'numeric', minute: 'numeric' };
+      return createdAtDate.toLocaleDateString(undefined, options);
+  }
+}
+
+// Function to format time (HH:MM)
+function formatTime(date) {
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
   return (
-    <SafeAreaView className="h-full">
+    <SafeAreaView className="h-full bg-primary">
       <ScrollView>
     <View  style={styles.container}>
+      <View className="items-center">
       <Text className="text-white mt-1" style={styles.title}>Track Complaint</Text>
-      <Text className="text-gray-100 " style={styles.text}>Ticket ID: {complaint.$id  }</Text>
-      <Text className="text-gray-100 " style={styles.text}>Complaint Type: {complaint.description}</Text>
-      <Text className="text-gray-100 " style={styles.text}>Details: {complaint.additionalDetails}</Text>
-      <Text className="text-gray-100 " style={styles.text}>Date: {complaint.createdAt}</Text>
+      </View>
+      
+      <View className="flex-row justify-between items-center">
+      <Text className="text-white font-pmedium text-xl ">{complaint.description}</Text>
+      <Text className="text-gray-100" style={styles.text} >{formatDate(complaint.createdAt)}</Text>
+      </View>
+      
+      <Text className="text-gray-100 mt-2 ">{complaint.additionalDetails}</Text>
+     
+
       
       <View className ="items-center mt-5" >
             <Image
@@ -37,9 +67,21 @@ const ComplaintDetails = () => {
             />
 
           </View>
-          <Text className="text-white mt-5" style={styles.title}>Complaint Resolved</Text>
+          <Text className="text-white mt-5" style={styles.title}>Complaint in Progress</Text>
           
       <Stepper status={complaint.status} />
+
+      <View className=" w-full flex-row justify-around mt-3">
+              <CustomButton
+                title="WITHDRAW"
+              
+              />
+              <CustomButton
+                title="REMIND"
+  
+              
+              />
+            </View>
     </View>
     </ScrollView>
     </SafeAreaView>
@@ -59,8 +101,8 @@ const styles = StyleSheet.create({
     color: 'white', // Ensure the text color is white
   },
   text: {
-    fontSize: 16,
-    marginBottom: 10,
+  
+
     color: 'gray', // Ensure the text color is gray
   },
   image: {
