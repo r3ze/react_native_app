@@ -66,7 +66,7 @@ const Home = () => {
 
   return (
     <SafeAreaView className="bg-primary h-full">
-  r
+  
       <MapView
         style={{ width: '100%', height: '100%' }}
         initialRegion={{
