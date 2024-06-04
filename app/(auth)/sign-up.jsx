@@ -56,13 +56,7 @@ const SignUp = () => {
         </View>
    <View className ="px-3">
 
-   <FormField
-  title="Name"
-  value={form.name}
-  handleChangeText={(e) => setForm({ ...form, name: e})}
-  otherStyles="mt-7 "
 
-  />
 
    <FormField
   title="Account Number"

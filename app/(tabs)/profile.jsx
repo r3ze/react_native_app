@@ -75,6 +75,8 @@ const Profile = () => {
       <Text className="text-xl text-center text-white font-psemibold">
           Account Information
         </Text>
+        {!isEditing && (
+        <>
         <Text className="text text-gray-100 font-pmedium">Name</Text>
         <View className="w-full mt-1 h-16 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
           <View className="flex-row justify-between w-full items-center px-4">
@@ -94,6 +96,8 @@ const Profile = () => {
             </View>
           </View>
         </View>
+        </>
+      )}
       {!isEditing && (
         <>
           
