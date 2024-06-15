@@ -7,9 +7,12 @@ import FormField from '../../components/FormField'
 import CustomButtons from '../../components/CustomButtons'
 import {getCurrentUser, signIn} from '../../lib/appwrite'
 import { useGlobalContext } from "../../context/GlobalProvider"
+import {createLog} from '../../lib/appwrite'
+
 
 const SignIn = () => {
-  const { setUser, setIsLoggedIn } = useGlobalContext();
+ 
+  const {user, setUser, setIsLoggedIn } = useGlobalContext();
   const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     email: "",
@@ -24,13 +27,17 @@ const SignIn = () => {
     setSubmitting(true);
 
     try {
+      
       await signIn(form.email, form.password);
       const result = await getCurrentUser();
       setUser(result);
       setIsLoggedIn(true);
 
+      const currentDate = new Date();
+      await createLog(result.$id, result.name, currentDate, form.email, "Login", "user")
       Alert.alert("Success", "User signed in successfully");
       router.replace("/home");
+
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {

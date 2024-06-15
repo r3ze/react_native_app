@@ -8,8 +8,9 @@ import CustomButtons from '../../components/CustomButtons'
 import {getCurrentUser, signIn} from '../../lib/appwrite'
 import { useGlobalContext } from "../../context/GlobalProvider"
 import {createUser} from '../../lib/appwrite'
+import {createLog} from '../../lib/appwrite'
 const SignUp = () => {
-  const { setUser, setIsLoggedIn } = useGlobalContext();
+  const { user, setUser, setIsLoggedIn } = useGlobalContext();
   const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -27,8 +28,10 @@ const SignUp = () => {
     setSubmitting(true)
     try {
       const result = await createUser(form.name, form.email, form.password, form.accountNumber, form.phone)
+      const currentDate = new Date();
       setUser(result);
       setIsLoggedIn(true);
+      
       router.replace("/submit")
       Alert.alert('Account created successfully')
 

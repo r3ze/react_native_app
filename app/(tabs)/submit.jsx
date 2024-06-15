@@ -13,7 +13,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { createComplaint } from '../../lib/appwrite';
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-
+import {createLog} from '../../lib/appwrite'
 const complaints = [
   { label: 'No Power', value: 'No Power' },
   { label: 'Defective Meter', value: 'Defective Meter' },
@@ -134,16 +134,7 @@ const submit = () => {
   const [barangayValue, setBarangayValue] = useState('');
   const [barangayData, setBarangayData] = useState([]);
 
-  const handleMunicipalityChange = (value) => {
-    setForm({ ...form, city: value });
-    setMunicipalityValue(value);
-    setBarangayData(barangays[value]);
-    setBarangayValue('');
-  };
 
-  const handleBarangayChange = (value) => {
-    setForm({ ...form, barangay: value });
-  };
 
   const handleDropdownChange = (value) => {
     setIsOthersSelected(value === 'Others');
@@ -233,7 +224,8 @@ const submit = () => {
         ...form, userName: user.$id, createdAt: currentDate, consumerName: user.name,
         city: user.city, barangay: user.barangay, street: user.street
       });
-
+  
+      await createLog(user.$id, user.name, currentDate, "Submitted a complaint", user.email, "user")
       Alert.alert("Success", "Complaint submitted successfully");
       router.push("/home");
     } catch (error) {
