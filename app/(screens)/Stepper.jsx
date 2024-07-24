@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import StepIndicator from 'react-native-step-indicator';
+
 
 const labels = [
   { date: 'Mon, Mar 20', description: 'Complaint Raised', time: 'Your complaint has been raised at 2:32 PM' },
@@ -34,7 +35,20 @@ const customStyles = {
   labelAlign: 'flex-start',
 };
 
-const Stepper = ({ currentPosition = 3 }) => {
+const statusMap = {
+  New: 1,
+  Assigned: 2,
+  Resolved: 3,
+  Closed: 4,
+};
+
+const Stepper = ({ complaintStatus }) => {
+  const [currentPosition, setCurrentPosition] = useState(statusMap[complaintStatus]);
+
+  useEffect(() => {
+    setCurrentPosition(statusMap[complaintStatus]);
+  }, [complaintStatus]);
+
   const renderLabel = ({ position, stepStatus, label, currentPosition }) => {
     return (
       <View style={styles.labelContainer}>
