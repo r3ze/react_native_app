@@ -310,7 +310,7 @@ const submit = () => {
                 Upload photo
               </Text>
               <Text className="text-gray-100 text-sm" style={{color:'gray'}}>
-                Photos help us to find the best staff and tools for your needs as soon as possible
+                Photos help us to find the best staff and tools for your needs as soon as possible.
               </Text>
            
              

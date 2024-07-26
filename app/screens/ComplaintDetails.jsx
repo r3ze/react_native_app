@@ -81,16 +81,18 @@ const ComplaintDetails = () => {
           <Text className="text-white mt-5" style={styles.title}>Complaint in Progress</Text>
 
           <Stepper complaintStatus={status} />
-
-          <View className="w-full flex-row justify-around mt-3">
-            <CustomButton
+          {complaint.status !== 'resolved' && (
+              <View className="px-4 w-full flex-row justify-around mt-3">
+               <CustomButton
               title="WITHDRAW"
             />
             <CustomButton
               title="REMIND"
               onPress={updateComplaint}
             />
-          </View>
+              </View>
+            )}
+     
         </View>
       </ScrollView>
     </SafeAreaView>
