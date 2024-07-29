@@ -2,14 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import StepIndicator from 'react-native-step-indicator';
 
-
-const labels = [
-  { date: 'Mon, Mar 20', description: 'Complaint Raised', time: 'Your complaint has been raised at 2:32 PM' },
-  { date: 'Mon, Mar 20', description: 'Task Assigned', time: 'Admin has assigned the task to the crew' },
-  { date: 'Mon, Mar 20', description: 'Resolution Team is Coming', time: 'The resolution team is coming' },
-  { date: 'Mon, Mar 20', description: 'Complaint Resolved', time: 'Complaint was successfully resolved' }
-];
-
 const customStyles = {
   stepIndicatorSize: 30,
   currentStepIndicatorSize: 40,
@@ -39,10 +31,10 @@ const statusMap = {
   New: 1,
   Assigned: 2,
   resolved: 4,
-  Closed: 4,
+  Closed: 3,
 };
 
-const Stepper = ({ complaintStatus }) => {
+const Stepper = ({ complaintStatus, labels }) => {
   const [currentPosition, setCurrentPosition] = useState(statusMap[complaintStatus]);
 
   useEffect(() => {

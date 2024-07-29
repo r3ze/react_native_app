@@ -101,7 +101,7 @@ const Home = () => {
       <View className="flex-row justify-between items-center px-4 py-2">
         <View className="flex-row">
           <Text className="font-pmedium mr-2 text-gray-100" style={{ color: 'gray' }}>Showing</Text>
-          <Text className="font-pmedium text-gray-100" style={{ color: 'gray' }}>{filter}</Text>
+          <Text className="font-pmedium text-gray-100" >{filter}</Text>
         </View>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
           <View className="flex-row items-center justify-between">
@@ -125,10 +125,10 @@ const Home = () => {
             </View>
             <View className="w-full mt-3 h-30 flex flex-row justify-between space-x-2">
               <View className="flex-row px-4">
-                <View className="w-1/5 mr-2">
+                <View className="w-1/5 mr-2 justify-center">
                   <Image
                     source={{ uri: item.image }}
-                    className="h-20 w-20"
+                    className="h-20 w-15"
                     resizeMode="contain"
                   />
                 </View>

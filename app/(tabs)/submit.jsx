@@ -1,4 +1,4 @@
-import { TextInput, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
+import { TextInput, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert,  Modal } from 'react-native';
 import { icons } from "../../constants";
 import { router } from "expo-router";
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -133,7 +133,8 @@ const submit = () => {
   const [municipalityValue, setMunicipalityValue] = useState('');
   const [barangayValue, setBarangayValue] = useState('');
   const [barangayData, setBarangayData] = useState([]);
-
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
 
   const handleDropdownChange = (value) => {
@@ -224,10 +225,10 @@ const submit = () => {
         ...form, userName: user.$id, createdAt: currentDate, consumerName: user.name,
         city: user.city, barangay: user.barangay, street: user.street
       });
-  
+      setModalMessage("Complaint submitted successfully");
+      setModalVisible(true); // Show the custom modal
       await createLog(user.$id, user.name, currentDate, "Submitted a complaint", user.email, "user")
-      Alert.alert("Success", "Complaint submitted successfully");
-      router.push("/home");
+      
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
@@ -354,7 +355,25 @@ const submit = () => {
           />
         </View>
       </ScrollView>
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.overlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Success</Text>
+            <Text style={styles.modalMessage}>{modalMessage}</Text>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
+
+    
   );
 };
 
@@ -390,4 +409,41 @@ const styles = StyleSheet.create({
     height: 40,
     fontSize: 16,
   },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: 300,
+    padding: 20,
+    backgroundColor: '#2c2c34',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: '#1e90ff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+
+  
 });
