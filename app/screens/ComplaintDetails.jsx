@@ -14,6 +14,8 @@ const ComplaintDetails = () => {
   const [status, setStatus] = useState(complaint.status);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
+  const [followUpDisabled, setFollowUpDisabled] = useState(false);
+  const [followUpDisabledDay, setFollowUpDisabledDay] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -23,7 +25,27 @@ const ComplaintDetails = () => {
 
   useEffect(() => {
     console.log('Complaint Image URL:', complaint.image); // Log the image URL to ensure it is correct
+    checkFollowUpEligibility();
   }, [complaint]);
+
+  const checkFollowUpEligibility = () => {
+    const complaintDate = new Date(complaint.createdAt);
+    const currentDate = new Date();
+    const diffInHours = (currentDate - complaintDate) / (1000 * 60 * 60);
+
+    console.log('Status:', status);
+    console.log('FollowUp:', complaint.followUp);
+    console.log('Hours since creation:', diffInHours);
+
+    // Disable follow-up if status is not New or Assigned, or if the complaint is less than 24 hours old
+    if (complaint.followUp === "Yes") {
+      setFollowUpDisabled(true);
+    }
+
+    if (diffInHours < 24) {
+      setFollowUpDisabledDay(true);
+    }
+  };
 
   // Function to format the date
   function formatDate(date) {
@@ -78,12 +100,30 @@ const ComplaintDetails = () => {
   };
 
   const updateComplaint = async () => {
+    const complaintDate = new Date(complaint.createdAt);
+    const currentDate = new Date();
+    const diffInHours = (currentDate - complaintDate) / (1000 * 60 * 60);
+
+    if (complaint.followUp === 'Yes') {
+      setModalMessage("Complaint already followed up.");
+      setModalVisible(true);
+      return;
+    }
+
+    if (diffInHours < 24) {
+      setModalMessage(`You need to wait ${24 - Math.floor(diffInHours)} more hours to follow up.`);
+      setModalVisible(true);
+      return;
+    }
+
     const followUp = "Yes";
     try {
       await updateComplaintStatus(complaint.$id, followUp);
       setModalMessage("Followed-up successfully");
       setModalVisible(true); // Show the custom modal
       setStatus(followUp); // Update the status state
+      setFollowUpDisabled(true); // Disable follow-up after success
+      setFollowUpDisabledDay(true); // Disable follow-up after success
     } catch (error) {
       console.error('Failed to update status:', error);
     }
@@ -125,7 +165,14 @@ const ComplaintDetails = () => {
               <CustomButton
                 title="REMIND"
                 onPress={updateComplaint}
+                disabled={followUpDisabled}
               />
+            </View>
+          )}
+
+          {followUpDisabled && (
+            <View className="px-4 w-full flex-row justify-center mt-3">
+              <Text className="text-gray-100">Complaint already followed up</Text>
             </View>
           )}
         </View>
@@ -138,7 +185,7 @@ const ComplaintDetails = () => {
       >
         <View style={styles.overlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Success</Text>
+            <Text style={styles.modalTitle}>Information</Text>
             <Text style={styles.modalMessage}>{modalMessage}</Text>
             <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>OK</Text>

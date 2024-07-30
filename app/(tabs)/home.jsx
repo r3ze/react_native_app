@@ -36,6 +36,7 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('All');
   const [modalVisible, setModalVisible] = useState(false);
+  const [visibleComplaints, setVisibleComplaints] = useState(4); // State to control the number of visible complaints
   const navigation = useNavigation();
 
   const handlePress = (item) => {
@@ -94,7 +95,7 @@ const Home = () => {
     if (filter === 'In progress' && (complaint.status === 'New' || complaint.status === 'Assigned')) return true;
     if (filter === 'Resolved' && complaint.status === 'resolved') return true;
     return false;
-  });
+  }).slice(0, visibleComplaints); // Limit the number of visible complaints
 
   return (
     <SafeAreaView className="bg-primary h-full">
@@ -163,6 +164,12 @@ const Home = () => {
         }
       />
 
+      {complaints.length > visibleComplaints && (
+        <TouchableOpacity onPress={() => setVisibleComplaints(complaints.length)}>
+          <Text style={styles.showMoreButton}>Show More</Text>
+        </TouchableOpacity>
+      )}
+
       <Modal
         transparent={true}
         animationType="slide"
@@ -211,6 +218,13 @@ const styles = StyleSheet.create({
   modalOption: {
     fontSize: 16,
     paddingVertical: 10,
+  },
+  showMoreButton: {
+    color: '#1e90ff',
+    textAlign: 'center',
+    padding: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

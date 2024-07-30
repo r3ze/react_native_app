@@ -10,6 +10,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
 import { createComplaint } from '../../lib/appwrite';
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { Colors } from 'react-native/Libraries/NewAppScreen';
@@ -135,7 +136,7 @@ const submit = () => {
   const [barangayData, setBarangayData] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-
+  const [location, setLocation] = useState(null);
 
   const handleDropdownChange = (value) => {
     setIsOthersSelected(value === 'Others');
@@ -210,6 +211,18 @@ const submit = () => {
   );
 };
 
+const getLocationAsync = async () => {
+  let { status } = await Location.requestForegroundPermissionsAsync();
+  if (status !== 'granted') {
+    Alert.alert('Permission to access location was denied');
+    return;
+  }
+
+  let currentLocation = await Location.getCurrentPositionAsync({});
+  setLocation(currentLocation.coords);
+   console.log('Location: ', currentLocation);
+};
+
   const submitComplaint = async () => {
     if (
       (form.description === "") 
@@ -223,7 +236,8 @@ const submit = () => {
       const currentDate = new Date();
       await createComplaint({
         ...form, userName: user.$id, createdAt: currentDate, consumerName: user.name,
-        city: user.city, barangay: user.barangay, street: user.street
+        city: user.city, barangay: user.barangay, street: user.street, Location: location ? `${location.latitude}, ${location.longitude}` : '',
+
       });
       setModalMessage("Complaint submitted successfully");
       setModalVisible(true); // Show the custom modal
@@ -346,6 +360,11 @@ const submit = () => {
               </Text>
               </View>
           </View>
+
+          <TouchableOpacity style={styles.locationButton} onPress={getLocationAsync}>
+            <Text style={styles.locationButtonText}>Use Current Location</Text>
+          </TouchableOpacity>
+
           <CustomButtons
             title="Submit"
             handlePress={submitComplaint}
@@ -415,6 +434,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+
+  locationButton: {
+    backgroundColor: '#4285F4',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  locationButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+
   modalContainer: {
     width: 300,
     padding: 20,
