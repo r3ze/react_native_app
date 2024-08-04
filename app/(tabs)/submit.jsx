@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { DataTable } from 'react-native-paper';
 import FormField from "../../components/FormField";
 import CustomButtons from "../../components/CustomButtons";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import * as DocumentPicker from 'expo-document-picker';
@@ -15,6 +15,7 @@ import { createComplaint } from '../../lib/appwrite';
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import {createLog} from '../../lib/appwrite'
+import axios from 'axios';
 const complaints = [
   { label: 'No Power', value: 'No Power' },
   { label: 'Defective Meter', value: 'Defective Meter' },
@@ -25,94 +26,6 @@ const complaints = [
   { label: 'Others', value: 'Others' },
 ];
 
-const city = [
-  { label: 'Pagsanjan', value: 'Pagsanjan' },
-  { label: 'Lumban', value: 'Lumban' },
-  { label: 'Cavinti', value: 'Cavinti' },
-  { label: 'Siniloan', value: 'Siniloan' },
-  { label: 'Kalayaan', value: 'Kalayaan' },
-  { label: 'Paete', value: 'Paete' },
-  { label: 'Pakil', value: 'Pakil' },
-  { label: 'Pangil', value: 'Pangil' },
-  { label: 'Mabitac', value: 'Mabitac' },
-  { label: 'Famy', value: 'Famy' },
-  { label: 'Sta. Maria', value: 'Sta. Maria' },
-];
-
-const barangays = {
-  'Pagsanjan': [
-    { label: 'San Isidro', value: 'San Isidro' },
-    { label: 'Maulawin', value: 'Maulawin' },
-    { label: 'Barangay I', value: 'Barangay I' },
-    { label: 'Barangay II', value: 'Barangay II' },
-    { label: 'Biñan', value: 'Biñan' },
-    { label: 'Buboy', value: 'Buboy' },
-    { label: 'Cabanbanan', value: 'Cabanbanan' },
-    { label: 'Calusiche', value: 'Calusiche' },
-    { label: 'Dingin', value: 'Dingin' },
-    { label: 'Lambac', value: 'Lambac' },
-  ],
-  'Lumban': [
-    { label: 'Bagong Silang', value: 'Bagong Silang' },
-    { label: 'Balimbingan', value: 'Balimbingan' },
-    { label: 'Balubad', value: 'Balubad' },
-    { label: 'Caliraya', value: 'Caliraya' },
-  ],
-  'Cavinti': [
-    { label: 'Anglas', value: 'Anglas' },
-    { label: 'Bangco', value: 'Bangco' },
-    { label: 'Bukal', value: 'Bukal' },
-    { label: 'Bulajo', value: 'Bulajo' },
-  ],
-  'Siniloan': [
-    { label: 'Acevida', value: 'Acevida' },
-    { label: 'Bagong Pag-asa', value: 'Bagong Pag-asa' },
-    { label: 'Buhay', value: 'Buhay' },
-    { label: 'G. Redor', value: 'G. Redor' },
-  ],
-  'Kalayaan': [
-    { label: 'Acevida', value: 'Acevida' },
-    { label: 'Bagong Pag-asa', value: 'Bagong Pag-asa' },
-    { label: 'Buhay', value: 'Buhay' },
-    { label: 'G. Redor', value: 'G. Redor' },
-  ],
-  'Paete': [
-    { label: 'Bagumbayan', value: 'Bagumbayan' },
-    { label: 'Bangkusay', value: 'Bangkusay' },
-    { label: 'Ermita', value: 'Ermita' },
-    { label: 'Ibaba del Norte', value: 'Ibaba del Norte' },
-  ],
-  'Pakil': [
-    { label: 'Banilan', value: 'Banilan' },
-    { label: 'Baño', value: 'Baño' },
-    { label: 'Burgos', value: 'Burgos' },
-    { label: 'Casa Real', value: 'Casa Real' },
-  ],
-  'Pangil': [
-    { label: 'Balian', value: 'Balian' },
-    { label: 'Dambo', value: 'Dambo' },
-    { label: 'Galalan', value: 'Galalan' },
-    { label: 'Isla', value: 'Isla' },
-  ],
-  'Mabitac': [
-    { label: 'Amuyong', value: 'Amuyong' },
-    { label: 'Bayanihan', value: 'Bayanihan' },
-    { label: 'Lambac', value: 'Lambac' },
-    { label: 'Libis ng Nayon', value: 'Libis ng Nayon' },
-  ],
-  'Famy': [
-    { label: 'Asana', value: 'Asana' },
-    { label: 'Bacong-Sigsigan', value: 'Bacong-Sigsigan' },
-    { label: 'Bagong Pag-asa', value: 'Bagong Pag-asa' },
-    { label: 'Balitoc', value: 'Balitoc' },
-  ],
-  'Sta. Maria': [
-    { label: 'Adia', value: 'Adia' },
-    { label: 'Bagong Pook', value: 'Bagong Pook' },
-    { label: 'Bagumbayan', value: 'Bagumbayan' },
-    { label: 'Barangay I', value: 'Barangay I' },
-  ],
-};
 
 const submit = () => {
   const { user } = useGlobalContext();
@@ -137,12 +50,17 @@ const submit = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [location, setLocation] = useState(null);
+  const [ExactLocation, setExactLocation] = useState(true);
+  const [showLocationField, setShowLocationField] = useState(false);
+  const [showDefaultSubmitButton, setShowDefaultSubmitButton] = useState(true);
 
+  
   const handleDropdownChange = (value) => {
     setIsOthersSelected(value === 'Others');
     setForm({ ...form, description: value });
   };
 
+ 
  
   const normalizeFile = (file, source) => {
     if (source === 'camera') {
@@ -197,7 +115,6 @@ const submit = () => {
           });
 
           if (!result.canceled) {
-            const normalizedAsset = normalizeFile(result, 'document');
             setForm((prevForm) => ({
               ...prevForm,
               thumbnail: result.assets[0],
@@ -210,52 +127,131 @@ const submit = () => {
     { cancelable: true }
   );
 };
-
 const getLocationAsync = async () => {
-  let { status } = await Location.requestForegroundPermissionsAsync();
-  if (status !== 'granted') {
-    Alert.alert('Permission to access location was denied');
-    return;
-  }
+  try {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      throw new Error('Permission to access location was denied');
+    }
 
-  let currentLocation = await Location.getCurrentPositionAsync({});
-  setLocation(currentLocation.coords);
-   console.log('Location: ', currentLocation);
+    let currentLocation = await Location.getCurrentPositionAsync({});
+    console.log('Location fetched:', currentLocation.coords);
+    return currentLocation.coords; // Return the location instead of setting state
+  } catch (error) {
+    console.error('Error fetching location:', error.message);
+    Alert.alert("Error", "Unable to fetch location. Please try again.");
+    return null; // Return null if there's an error
+  }
 };
 
-  const submitComplaint = async () => {
-    if (
-      (form.description === "") 
+
+const getPlaceName = async (latitude, longitude) => {
+  const apiKey = '1e506c976e8f4326be97179c1b0b59c3'; //  OpenCage API key
+  const url = `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${apiKey}`;
+
+  try {
+    const response = await axios.get(url);
+    if (response.data.results.length > 0) {
+      const place = response.data.results[0].formatted;
+      return place;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+const handleSubmitPress = async () => {
+
+  if (form.description === "") {
+    return Alert.alert("Please fill in all fields!");
+  }
+
+  Alert.alert(
+    "Use Current Location",
+    "Would you like to use your current location?",
+    [
+      {
+        text: "Yes",
+        onPress: async () => {
+          const fetchedLocation = await getLocationAsync();
+          
+          if (fetchedLocation) {
+        
+            console.log(ExactLocation);
+            submitComplaint(fetchedLocation);
+          } else {
+            Alert.alert("Error", "Unable to fetch location. Please try again.");
+          }
+        },
+      },
+      {
+        text: "No",
+        onPress: () => {
+          setShowLocationField(true);
+          setShowDefaultSubmitButton(false);
+          setLocation(null);
+          setExactLocation(false);
+        },
+        style: "cancel",
+      },
+    ],
+    { cancelable: false }
+  );
+};
+
+const submitComplaint = async (location) => {
+
+  if (!location && !showLocationField) {
+    return Alert.alert("Please provide a location!");
+  }
+
+  setUploading(true);
+  try {
+    const currentDate = new Date();
+    let placeName = null;
     
-    ) {
-      return Alert.alert("Please fill in all fields!");
+    if (location && ExactLocation) {
+      placeName = await getPlaceName(location.latitude, location.longitude);
+    }
+    else{
+      placeName = form.location;
     }
 
-    setUploading(true);
-    try {
-      const currentDate = new Date();
-      await createComplaint({
-        ...form, userName: user.$id, createdAt: currentDate, consumerName: user.name,
-        city: user.city, barangay: user.barangay, street: user.street, Location: location ? `${location.latitude}, ${location.longitude}` : '',
+    console.log('Submitting complaint with location:', location);
 
-      });
-      setModalMessage("Complaint submitted successfully");
-      setModalVisible(true); // Show the custom modal
-      await createLog(user.$id, user.name, currentDate, "Submitted a complaint", user.email, "user")
-      
-    } catch (error) {
-      Alert.alert("Error", error.message);
-    } finally {
-      setForm({
-        description: "",
-        city: "",
-        thumbnail: null,
-        barangay: "",
-      });
+    await createComplaint({
+      ...form,
+      userName: user.$id,
+      createdAt: currentDate,
+      consumerName: user.name,
+      Location: location ? `${location.latitude}, ${location.longitude}` : '',
+      locationName: placeName,
+    });
 
-      setUploading(false);
-    }
-  };
+    setModalMessage("Complaint submitted successfully");
+    setModalVisible(true); // Show the custom modal
+    await createLog(user.$id, user.name, currentDate, "Submitted a complaint", user.email, "user");
+    setShowLocationField(false);
+    setExactLocation(true);
+  } catch (error) {
+    console.error('Error submitting complaint:', error.message);
+    Alert.alert("Error", error.message);
+  } finally {
+    setForm({
+      description: "",
+      location: "",
+      thumbnail: null,
+      details: "",
+    });
+
+    setUploading(false);
+  }
+};
+
+
+
 
   return (
     <SafeAreaView className="bg-primary h-full">
@@ -361,17 +357,38 @@ const getLocationAsync = async () => {
               </View>
           </View>
 
-          <TouchableOpacity style={styles.locationButton} onPress={getLocationAsync}>
-            <Text style={styles.locationButtonText}>Use Current Location</Text>
-          </TouchableOpacity>
-
-          <CustomButtons
+        
+          {showLocationField && (
+            <>
+            <FormField
+              title="Location"
+              value={form.location}
+              handleChangeText={(e) => setForm({ ...form, location: e })}
+              otherStyles="mt-7"
+              placeholder="Enter city, barangay, and street"
+            />
+            
+            <CustomButtons
             title="Submit"
             handlePress={submitComplaint}
             containerStyles="mt-7"
             isLoading={uploading}
             className="min-h-[62px]"
           />
+          </>
+            
+          )}
+
+{!showLocationField && (
+          <CustomButtons
+            title="Submit"
+            handlePress={handleSubmitPress}
+            containerStyles="mt-7"
+            isLoading={uploading}
+            className="min-h-[62px]"
+          />
+
+)}
         </View>
       </ScrollView>
       <Modal
