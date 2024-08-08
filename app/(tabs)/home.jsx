@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { icons } from "../../constants";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import useAppwrite from '../../lib/useAppwrite';
-import { getUserComplaints } from "../../lib/appwrite";
+import { getUserComplaints, updateComplaintStatusToWithdrawn } from "../../lib/appwrite";
 import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../../components/CustomButton';
 import { FontAwesome } from '@expo/vector-icons'; 
@@ -32,12 +32,24 @@ function formatTime(date) {
 
 const Home = () => {
   const { user } = useGlobalContext();
-  const { data: complaints, refetch } = useAppwrite(() => getUserComplaints(user.$id));
+  const { data: initialComplaints, refetch } = useAppwrite(() => getUserComplaints(user.$id));
+  const [complaints, setComplaints] = useState(initialComplaints);
+
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('All');
   const [modalVisible, setModalVisible] = useState(false);
+  const [okModalVisible, setOkModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
   const [visibleComplaints, setVisibleComplaints] = useState(4); // State to control the number of visible complaints
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [selectedComplaintId, setSelectedComplaintId] = useState(null);
+  
   const navigation = useNavigation();
+
+
+  useEffect(() => {
+    setComplaints(initialComplaints);
+  }, [initialComplaints]);
 
   const handlePress = (item) => {
     navigation.navigate('screens/ComplaintDetails', { complaint: item });
@@ -56,6 +68,8 @@ const Home = () => {
         return 'In progress';
       case 'resolved':
         return 'Resolved';
+        case 'Withdrawn':
+        return 'Withdrawn';
       default:
         return status;
     }
@@ -68,6 +82,8 @@ const Home = () => {
         return <MaterialIcons name="autorenew" size={24} color="#FF9C01" />;
       case 'resolved':
         return <MaterialIcons name="check-circle" size={24} color="green" />;
+        case 'Withdrawn':
+          return <MaterialIcons name="cancel" size={24} color="gray" />;
       default:
         return null;
     }
@@ -94,8 +110,37 @@ const Home = () => {
     if (filter === 'All') return true;
     if (filter === 'In progress' && (complaint.status === 'New' || complaint.status === 'Assigned')) return true;
     if (filter === 'Resolved' && complaint.status === 'resolved') return true;
+    if (filter === 'Withdrawn' && complaint.status === 'Withdrawn') return true;
     return false;
   }).slice(0, visibleComplaints); // Limit the number of visible complaints
+
+
+  const handleWithdrawPress = (complaintId) => {
+    setConfirmModalVisible(true);
+    setSelectedComplaintId(complaintId)
+  };
+  
+  const confirmWithdrawal = async () => {
+    setConfirmModalVisible(false);
+    await withdrawComplaint(selectedComplaintId);
+  };
+  
+  const withdrawComplaint = async (complaintId) => {
+    const status = "Withdrawn";
+    try {
+      await updateComplaintStatusToWithdrawn(complaintId, status);
+      setComplaints(prevComplaints =>
+        prevComplaints.map(complaint =>
+          complaint.$id === complaintId ? { ...complaint, status } : complaint
+        )
+      );
+      setModalMessage("Withdrawn successfully");
+      setOkModalVisible(true); // Show the custom modal
+    } catch (error) {
+      console.error('Failed to withdraw complaint: ', error);
+    }
+  };
+
 
   return (
     <SafeAreaView className="bg-primary h-full">
@@ -139,14 +184,14 @@ const Home = () => {
                 </View>
               </View>
             </View>
-            <View className={`px-4 w-full flex-row ${item.status === 'resolved' ? 'justify-end' : 'justify-around'} mt-3`}>
-              {item.status !== 'resolved' && (
+            <View className={`px-4 w-full flex-row ${item.status === 'resolved' || item.status==='Withdrawn' ? 'justify-end' : 'justify-around'} mt-3`}>
+              {item.status !== 'resolved' && item.status!== 'Withdrawn'  && (
                 <>
-                  <CustomButton title="WITHDRAW" />
+                  <CustomButton title="WITHDRAW" onPress={() => handleWithdrawPress(item.$id)} />
                   <CustomButton title="TRACK" onPress={() => handlePress(item)} />
                 </>
               )}
-              {item.status === 'resolved' && (
+              {item.status === 'resolved' ||item.status ==='Withdrawn' && (
                 <CustomButton title="VIEW" onPress={() => handlePress(item)} />
               )}
             </View>
@@ -190,8 +235,49 @@ const Home = () => {
           <TouchableOpacity onPress={() => applyFilter('Resolved')}>
             <Text style={styles.modalOption}>Resolved</Text>
           </TouchableOpacity>
+          <TouchableOpacity onPress={() => applyFilter('Withdrawn')}>
+            <Text style={styles.modalOption}>Withdrawn</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
+
+      <Modal
+          transparent={true}
+          animationType="fade"
+          visible={okModalVisible}
+          onRequestClose={() => setOkModalVisible(false)}
+        >
+          <View style={styles.overlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Information</Text>
+              <Text style={styles.modalMessage}>{modalMessage}</Text>
+              <TouchableOpacity onPress={() => setOkModalVisible(false)} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      <Modal
+      transparent={true}
+      animationType="fade"
+      visible={confirmModalVisible}
+      onRequestClose={() => setConfirmModalVisible(false)}
+    >
+      <View style={styles.overlay}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Confirm Withdrawal</Text>
+          <Text style={styles.modalMessage}>Are you sure you want to withdraw the complaint?</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <TouchableOpacity onPress={() => setConfirmModalVisible(false)} style={[styles.cancelButton, styles.buttonWidth]}>
+          <Text style={styles.buttonText}>Cancel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={confirmWithdrawal} style={[styles.confirmButton, styles.buttonWidth]}>
+          <Text style={styles.buttonText}>Yes</Text>
+        </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
     </SafeAreaView>
   );
 };
@@ -225,6 +311,66 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: 300,
+    padding: 20,
+    backgroundColor: '#2c2c34',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: '#1e90ff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  
+
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+
+  buttonWidth: {
+    width: 100, // Fixed width for buttons
+  },
+  cancelButton: {
+    backgroundColor: '#ff4c4c', // Red color for the cancel button
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  confirmButton: {
+    backgroundColor: '#1e90ff', // Blue color for the confirm button
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 
