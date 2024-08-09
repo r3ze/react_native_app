@@ -80,7 +80,7 @@ const Home = () => {
       case 'New':
       case 'Assigned':
         return <MaterialIcons name="autorenew" size={24} color="#FF9C01" />;
-      case 'resolved':
+      case 'Resolved':
         return <MaterialIcons name="check-circle" size={24} color="green" />;
         case 'Withdrawn':
           return <MaterialIcons name="cancel" size={24} color="gray" />;
@@ -94,7 +94,7 @@ const Home = () => {
       case 'New':
       case 'Assigned':
         return '#FF9C01';
-      case 'resolved':
+      case 'Resolved':
         return 'green';
       default:
         return 'gray';
@@ -109,7 +109,7 @@ const Home = () => {
   const filteredComplaints = complaints.filter(complaint => {
     if (filter === 'All') return true;
     if (filter === 'In progress' && (complaint.status === 'New' || complaint.status === 'Assigned')) return true;
-    if (filter === 'Resolved' && complaint.status === 'resolved') return true;
+    if (filter === 'Resolved' && complaint.status === 'Resolved') return true;
     if (filter === 'Withdrawn' && complaint.status === 'Withdrawn') return true;
     return false;
   }).slice(0, visibleComplaints); // Limit the number of visible complaints
@@ -184,14 +184,18 @@ const Home = () => {
                 </View>
               </View>
             </View>
-            <View className={`px-4 w-full flex-row ${item.status === 'resolved' || item.status==='Withdrawn' ? 'justify-end' : 'justify-around'} mt-3`}>
-              {item.status !== 'resolved' && item.status!== 'Withdrawn'  && (
+            <View className={`px-4 w-full flex-row ${item.status === 'Resolved' || item.status==='Withdrawn' ? 'justify-end' : 'justify-around'} mt-3`}>
+              {item.status !== 'Resolved' && item.status!== 'Withdrawn'  && (
                 <>
                   <CustomButton title="WITHDRAW" onPress={() => handleWithdrawPress(item.$id)} />
                   <CustomButton title="TRACK" onPress={() => handlePress(item)} />
                 </>
               )}
-              {item.status === 'resolved' ||item.status ==='Withdrawn' && (
+              {item.status ==='Withdrawn' && (
+                <CustomButton title="VIEW" onPress={() => handlePress(item)} />
+              )}
+
+               {item.status === 'Resolved'  && (
                 <CustomButton title="VIEW" onPress={() => handlePress(item)} />
               )}
             </View>

@@ -81,7 +81,7 @@
       ];
 
       labels.push({
-        date: complaint.assignedAt ? formatDate(complaint.assignedAt) : 'Pending',
+        date: complaint.assignedAt ? formatDate(complaint.assignedAt) : 'Assigned',
         description: 'Task Assigned',
         time: complaint.assignedAt ? 'Admin has assigned task to the crew.' : 'Task assignment is pending.'
       });
@@ -164,10 +164,10 @@
             {withdrawnStatus  && (
          <Text className="text-white mt-5" style={styles.title}>Complaint Withdrawn</Text>
             )}
-            {complaint.status ==='resolved' && !withdrawnStatus && (
+            {complaint.status ==='Resolved' && !withdrawnStatus && (
          <Text className="text-white mt-5" style={styles.title}>Complaint Resolved</Text>
             )}
-                {complaint.status !=='resolved' && complaint.status !=='Withdrawn' && !withdrawnStatus && (
+                {complaint.status !=='Resolved' && complaint.status !=='Withdrawn' && !withdrawnStatus && (
          <Text className="text-white mt-5" style={styles.title}>Complaint In Progress</Text>
             )}
             </View>
@@ -196,7 +196,7 @@
         <Stepper complaintStatus={status} labels={generateLabels()} />
             )}
 
-            {complaint.status !== 'resolved' && complaint.status !=='Withdrawn' && !withdrawnStatus && (
+            {complaint.status !== 'Resolved' && complaint.status !=='Withdrawn' && !withdrawnStatus && (
               <View className="px-4 w-full flex-row justify-around mt-3">
                 <CustomButton
                   title="WITHDRAW"
