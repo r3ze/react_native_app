@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../../components/CustomButton';
 import { FontAwesome } from '@expo/vector-icons'; 
 import { MaterialIcons } from '@expo/vector-icons'; 
-
+import { Client, Databases} from 'appwrite';
 // Function to format the date
 function formatDate(createdAt) {
   const createdAtDate = new Date(createdAt);
@@ -49,6 +49,41 @@ const Home = () => {
 
   useEffect(() => {
     setComplaints(initialComplaints);
+
+    // Initialize Appwrite client
+ const client = new Client();
+ try {
+   client
+     .setEndpoint('https://cloud.appwrite.io/v1') // Replace with your Appwrite endpoint
+     .setProject('662248657f5bd3dd103c'); // Replace with your Appwrite project ID
+     console.log(' initialized Appwrite client:');
+ } catch (error) {
+   console.error('Failed to initialize Appwrite client:', error);
+ }
+
+ const databases = new Databases(client);
+
+ // Subscribe to real-time events
+ const unsubscribe = databases.client.subscribe(`databases.66224a152d9f9a67af78.collections.6626029b134a98006f77.documents`, (response) => {
+   if (response.events.includes("databases.*.collections.*.documents.*.update")) {
+     const updatedComplaint = response.payload;
+
+     // Update the complaints state with the updated complaint
+     setComplaints(prevComplaints =>
+       prevComplaints.map(complaint =>
+         complaint.$id === updatedComplaint.$id ? updatedComplaint : complaint
+       )
+     );
+   }
+ });
+
+ return () => {
+   unsubscribe(); // Clean up the subscription when the component unmounts
+ };
+
+ 
+
+ 
   }, [initialComplaints]);
 
   const handlePress = (item) => {

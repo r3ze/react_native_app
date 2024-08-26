@@ -16,6 +16,8 @@ import { useGlobalContext } from "../../context/GlobalProvider";
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import {createLog} from '../../lib/appwrite'
 import axios from 'axios';
+import GeoSearch from '../geosearch/geoSearch'
+
 const complaints = [
   { label: 'No Power', value: 'No Power' },
   { label: 'Defective Meter', value: 'Defective Meter' },
@@ -54,6 +56,9 @@ const submit = () => {
   const [showLocationField, setShowLocationField] = useState(false);
   const [showDefaultSubmitButton, setShowDefaultSubmitButton] = useState(true);
 
+
+  const [selectedAddress, setSelectedAddress] = useState('');
+  const [coordinates, setCoordinates] = useState(null);
   
   const handleDropdownChange = (value) => {
     setIsOthersSelected(value === 'Others');
@@ -127,6 +132,39 @@ const submit = () => {
     { cancelable: true }
   );
 };
+
+//Forward Geocoding
+
+const getCoordinatesFromAddress = async (address) => {
+  try {
+    const response = await axios.get('https://api.opencagedata.com/geocode/v1/json', {
+      params: {
+        q: address,
+        key: '1e506c976e8f4326be97179c1b0b59c3',
+      },
+    });
+
+    if (response.data && response.data.results && response.data.results.length > 0) {
+      const { lat, lng } = response.data.results[0].geometry;
+      return { latitude: lat, longitude: lng };
+    } else {
+      throw new Error('No results found for the given address');
+    }
+  } catch (error) {
+    console.error('Error in forward geocoding:', error);
+    return null;
+  }
+};
+
+const handleAddressSelection = (address) => {
+  getCoordinatesFromAddress(address);
+};
+
+
+
+
+
+//Reverse Geocoding
 const getLocationAsync = async () => {
   try {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -250,6 +288,49 @@ const submitComplaint = async (location) => {
   }
 };
 
+const handleGeocode = async () => {
+  if (!selectedAddress) return;
+  setUploading(true);
+  const result = await getCoordinatesFromAddress(selectedAddress);
+  if (result) {
+    setCoordinates(result);
+    console.log(coordinates)
+  }
+  try {
+    const currentDate = new Date();
+
+  
+    await createComplaint({
+      ...form,
+      userName: user.$id,
+      createdAt: currentDate,
+      consumerName: user.name,
+      Location: `${result.latitude}, ${result.longitude}`,
+      locationName: selectedAddress
+    });
+
+    setModalMessage("Complaint submitted successfully");
+    setModalVisible(true); // Show the custom modal
+    await createLog(user.$id, user.name, currentDate, "Submitted a complaint", user.email, "user");
+    setShowLocationField(false);
+    setExactLocation(true);
+  } catch (error) {
+    console.error('Error submitting complaint:', error.message);
+    Alert.alert("Error", error.message);
+  } finally {
+    setForm({
+      description: "",
+      location: "",
+      thumbnail: null,
+      details: "",
+    });
+
+    setUploading(false);
+  }
+
+};
+
+
 
 
 
@@ -360,17 +441,12 @@ const submitComplaint = async (location) => {
         
           {showLocationField && (
             <>
-            <FormField
-              title="Location"
-              value={form.location}
-              handleChangeText={(e) => setForm({ ...form, location: e })}
-              otherStyles="mt-7"
-              placeholder="Enter city, barangay, and street"
-            />
+
+             <GeoSearch onAddressSelected={setSelectedAddress} />
             
             <CustomButtons
             title="Submit"
-            handlePress={submitComplaint}
+            handlePress={handleGeocode}
             containerStyles="mt-7"
             isLoading={uploading}
             className="min-h-[62px]"
@@ -387,8 +463,10 @@ const submitComplaint = async (location) => {
             isLoading={uploading}
             className="min-h-[62px]"
           />
+          
 
 )}
+
         </View>
       </ScrollView>
       <Modal

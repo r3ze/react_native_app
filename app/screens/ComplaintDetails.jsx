@@ -6,12 +6,16 @@
   import CustomButton from '../../components/CustomButton';
   import { updateComplaintStatus, updateComplaintStatusToWithdrawn } from '../../lib/appwrite';
   import Stepper from '../(screens)/Stepper';
+  import { Client} from 'appwrite';
+
+ 
 
   const ComplaintDetails = () => {
     const route = useRoute();
     const navigation = useNavigation();
     const { complaint } = route.params;
     const [status, setStatus] = useState(complaint.status);
+    const [assignedAt, setAssignedAt] = useState(complaint.status);
     const [modalVisible, setModalVisible] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const [followUpDisabled, setFollowUpDisabled] = useState(false);
@@ -28,6 +32,51 @@
     useEffect(() => {
       console.log('Complaint Image URL:', complaint.image); // Log the image URL to ensure it is correct
       checkFollowUpEligibility();
+ // Initialize Appwrite client
+ const client = new Client();
+ try {
+   client
+     .setEndpoint('https://cloud.appwrite.io/v1') // Replace with your Appwrite endpoint
+     .setProject('662248657f5bd3dd103c'); // Replace with your Appwrite project ID
+     console.log(' initialized Appwrite client:');
+ } catch (error) {
+   console.error('Failed to initialize Appwrite client:', error);
+ }
+    
+      // Set up real-time listener for complaint status updates
+      let unsubscribe;
+      try {
+        unsubscribe = client.subscribe(
+          `databases.66224a152d9f9a67af78.collections.6626029b134a98006f77.documents.${complaint.$id}`,
+          (response) => {
+            const event = response.events[0];
+            console.log(event)
+            if (event.includes('update')) {
+              const updatedComplaint = response.payload;
+              console.log('Update event matched');
+              setStatus(updatedComplaint.status);
+              setAssignedAt(updatedComplaint.assignedAt);
+              console.log(assignedAt)
+              if (updatedComplaint.status === 'Withdrawn') {
+                setWithdrawnStatus(true);
+              }
+            }
+          }
+        );
+      } catch (error) {
+        console.error('Failed to subscribe to real-time updates:', error);
+      }
+    
+      // Cleanup subscription on unmount
+      return () => {
+        try {
+          if (unsubscribe) {
+            unsubscribe();
+          }
+        } catch (error) {
+          console.error('Failed to unsubscribe from real-time updates:', error);
+        }
+      };
     }, [complaint]);
 
     const checkFollowUpEligibility = () => {
@@ -164,10 +213,10 @@
             {withdrawnStatus  && (
          <Text className="text-white mt-5" style={styles.title}>Complaint Withdrawn</Text>
             )}
-            {complaint.status ==='Resolved' && !withdrawnStatus && (
+            {status ==='Resolved' && !withdrawnStatus && (
          <Text className="text-white mt-5" style={styles.title}>Complaint Resolved</Text>
             )}
-                {complaint.status !=='Resolved' && complaint.status !=='Withdrawn' && !withdrawnStatus && (
+                {status !=='Resolved' && status !=='Withdrawn' && !withdrawnStatus && (
          <Text className="text-white mt-5" style={styles.title}>Complaint In Progress</Text>
             )}
             </View>
@@ -196,7 +245,7 @@
         <Stepper complaintStatus={status} labels={generateLabels()} />
             )}
 
-            {complaint.status !== 'Resolved' && complaint.status !=='Withdrawn' && !withdrawnStatus && (
+            {status !== 'Resolved' && status !=='Withdrawn' && !withdrawnStatus && (
               <View className="px-4 w-full flex-row justify-around mt-3">
                 <CustomButton
                   title="WITHDRAW"
