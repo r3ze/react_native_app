@@ -130,9 +130,9 @@
       ];
 
       labels.push({
-        date: complaint.assignedAt ? formatDate(complaint.assignedAt) : 'Assigned',
+        date: status == 'Assigned' ? formatDate(complaint.assignedAt) : 'Assigned',
         description: 'Task Assigned',
-        time: complaint.assignedAt ? 'Admin has assigned task to the crew.' : 'Task assignment is pending.'
+        time: status == 'Assigned' ? 'Admin has assigned task to the crew.' : 'Task assignment is pending.'
       });
 
       labels.push({

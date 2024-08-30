@@ -10,6 +10,7 @@ import CustomButton from '../../components/CustomButton';
 import { FontAwesome } from '@expo/vector-icons'; 
 import { MaterialIcons } from '@expo/vector-icons'; 
 import { Client, Databases} from 'appwrite';
+import EmptyState from '../../components/EmptyState';
 // Function to format the date
 function formatDate(createdAt) {
   const createdAtDate = new Date(createdAt);
@@ -243,6 +244,32 @@ const Home = () => {
             </View>
           </View>
         )}
+
+        ListEmptyComponent={() => {
+          let emptyTitle = '';
+          let emptySubtitle = '';
+        
+          if (filter === 'All') {
+            emptyTitle = "No Complaints Yet.";
+            emptySubtitle = "You Haven't Reported Any Issues.";
+          } else if (filter === 'In progress') {
+            emptyTitle = "No Complaints In Progress.";
+            emptySubtitle = "You Have No Ongoing Issues.";
+          } else if (filter === 'Resolved') {
+            emptyTitle = "No Resolved Complaints.";
+            emptySubtitle = "No Issues Have Been Resolved Yet.";
+          } else if (filter === 'Withdrawn') {
+            emptyTitle = "No Withdrawn Complaints.";
+            emptySubtitle = "You Have Not Withdrawn Any Complaints.";
+          }
+        
+          return (
+            <EmptyState
+              title={emptyTitle}
+              subtitle={emptySubtitle}
+            />
+          );
+        }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -253,6 +280,7 @@ const Home = () => {
           <Text style={styles.showMoreButton}>Show More</Text>
         </TouchableOpacity>
       )}
+
 
       <Modal
         transparent={true}

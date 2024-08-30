@@ -69,7 +69,7 @@ const GeoSearch = ({onAddressSelected}) => {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 10,
+     
       },
       suggestionsContainer: {
         backgroundColor: 'white',

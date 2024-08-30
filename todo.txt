@@ -1,0 +1,9 @@
+1. Forgot password
+2. Fix minor bugs
+    3. Service Area Boundaries: Display boundaries of service areas or zones,
+    helping consumers understand if they are within a specific 
+    coverage area or if they need to contact a different service provider.
+4. Empty State
+Pagsanjan
+Lumban
+Cavinti

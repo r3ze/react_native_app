@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MapView, { Marker, Callout, Geojson } from 'react-native-maps';
-import { MaterialIcons } from '@expo/vector-icons';
+import MapView, { Marker, Callout, Geojson, Circle } from 'react-native-maps';
 import { useGlobalContext } from "../../context/GlobalProvider";
 import useAppwrite from '../../lib/useAppwrite';
 import { getAllComplaints } from "../../lib/appwrite"; 
-import { Databases, Client} from 'appwrite';
-import serviceAreaGeoJSON from "../../geojson/areas.json"
+import { Databases, Client } from 'appwrite';
+import serviceAreaGeoJSON from "../../geojson/areas.json";
+
 const Map = () => {
   const { data: complaints, refetch } = useAppwrite(getAllComplaints);
   const [activeComplaints, setActiveComplaints] = useState([]);
@@ -18,54 +18,35 @@ const Map = () => {
     return { latitude, longitude };
   };
 
-  // Function to get the appropriate icon based on complaint type
-  const getComplaintIcon = (type) => {
-    switch (type) {
-      case 'No Power':
-        return <MaterialIcons name="power" size={32} color="red" />;
-      case 'Defective Meter':
-        return <MaterialIcons name="speed" size={32} color="orange" />;
-      case 'Detached Meter':
-        return <MaterialIcons name="electrical-services" size={32} color="blue" />;
-      case 'Low Voltage':
-        return <MaterialIcons name="bolt" size={32} color="yellow" />;
-      case 'No Reading':
-        return <MaterialIcons name="speed" size={32} color="purple" />;
-      case 'Loose Connection/Sparkling of Wire':
-        return <MaterialIcons name="electrical-services" size={32} color="green" />;
-      default:
-        return <MaterialIcons name="warning" size={32} color="gray" />;
-    }
-  };
-
   // Filter complaints to only include active ones (not resolved or withdrawn)
   useEffect(() => {
     setActiveComplaints(complaints.filter(
       (complaint) => complaint.status !== 'Resolved' && complaint.status !== 'Withdrawn'
     ));
   }, [complaints]);
-     // Initialize Appwrite client
- const client = new Client();
- try {
-   client
-     .setEndpoint('https://cloud.appwrite.io/v1') // Replace with your Appwrite endpoint
-     .setProject('662248657f5bd3dd103c'); // Replace with your Appwrite project ID
-     console.log(' initialized Appwrite client:');
- } catch (error) {
-   console.error('Failed to initialize Appwrite client:', error);
- }
- const databases = new Databases(client);
+
+  // Initialize Appwrite client
+  const client = new Client();
+  try {
+    client
+      .setEndpoint('https://cloud.appwrite.io/v1') // Replace with your Appwrite endpoint
+      .setProject('662248657f5bd3dd103c'); // Replace with your Appwrite project ID
+    console.log('Initialized Appwrite client:');
+  } catch (error) {
+    console.error('Failed to initialize Appwrite client:', error);
+  }
+  const databases = new Databases(client);
 
   // Subscribe to real-time updates
   useEffect(() => {
     const unsubscribe = databases.client.subscribe(`databases.66224a152d9f9a67af78.collections.6626029b134a98006f77.documents`, (response) => {
       if (response.events.includes("databases.*.collections.*.documents.*.update")) {
-        console.log("update event matched");
+        console.log("Update event matched");
         refetch(); // Refetch complaints to update the list
       }
 
       if (response.events.includes("databases.*.collections.*.documents.*.create")) {
-        console.log("create event matched");
+        console.log("Create event matched");
         refetch(); // Refetch complaints to update the list
       }
     });
@@ -91,22 +72,40 @@ const Map = () => {
           const { latitude, longitude } = parseLocation(complaint.Location);
 
           return (
-            <Marker
-              key={complaint.$id}
-              coordinate={{ latitude, longitude }}
-            >
-              {getComplaintIcon(complaint.description)}
-              <Callout>
-                <View>
-                  <Text>{complaint.description}</Text>
-                </View>
-              </Callout>
-            </Marker>
+            <React.Fragment key={complaint.$id}>
+              {/* Circle Marker */}
+              <Circle
+                center={{ latitude, longitude }}
+                radius={5} // Adjust the radius as needed
+                strokeColor="rgba(0, 0, 0, 0.5)" // Dark circle outline
+                fillColor="#ffb09c" // Light color inside the circle
+              />
+              <Marker
+                coordinate={{ latitude, longitude }}
+              >
+                {/* Custom Dot Marker */}
+                <View
+                  style={{
+                    height: 12, // Diameter of the dot
+                    width: 12,
+                    borderRadius: 6, // Radius to make it a circle
+                    backgroundColor: 'red', // Dot color
+                    borderColor: 'red', // Optional border color
+                    borderWidth: 1, // Optional border width
+                  }}
+                />
+                <Callout>
+                  <View>
+                    <Text>{complaint.description}</Text>
+                  </View>
+                </Callout>
+              </Marker>
+            </React.Fragment>
           );
         })}
 
+       
       </MapView>
-   
     </SafeAreaView>
   );
 };

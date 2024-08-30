@@ -156,9 +156,6 @@ const getCoordinatesFromAddress = async (address) => {
   }
 };
 
-const handleAddressSelection = (address) => {
-  getCoordinatesFromAddress(address);
-};
 
 
 

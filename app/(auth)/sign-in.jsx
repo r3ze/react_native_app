@@ -74,13 +74,19 @@ const SignIn = () => {
   otherStyles="mt-7"
  
   />
+     <View className="px-3 pt-5 flex-row gap-2">
+   <Link href="/forgot-password" className="text-sm text-secondary font-pbold">
+        Forgot Password?
+       </Link>
+       </View>
+
     <CustomButtons 
     title="Sign in"
     handlePress={submit}
     containerStyles="mt-7"
     isLoading={isSubmitting}/>
    </View>
-  
+
    <View className="justify-center pt-5 flex-row gap-2">
        <Text className="text-lg text-gray-100 font-pregular">
         Don't have an account?
