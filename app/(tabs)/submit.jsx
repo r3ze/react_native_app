@@ -13,11 +13,11 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { createComplaint } from '../../lib/appwrite';
 import { useGlobalContext } from "../../context/GlobalProvider";
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { useRoute } from '@react-navigation/native';
 import {createLog} from '../../lib/appwrite'
 import axios from 'axios';
 import GeoSearch from '../geosearch/geoSearch'
-
+import { useNavigation } from '@react-navigation/native';
 const complaints = [
   { label: 'No Power', value: 'No Power' },
   { label: 'Defective Meter', value: 'Defective Meter' },
@@ -38,8 +38,9 @@ const submit = () => {
     thumbnail: '',
     street: '',
     details: '',
+    address: ''
   });
-  
+  const navigation = useNavigation();
   const [isOthersSelected, setIsOthersSelected] = useState(false); //for complaints dropdown
 
   const [uploading, setUploading] = useState(false);
@@ -60,6 +61,22 @@ const submit = () => {
   const [selectedAddress, setSelectedAddress] = useState('');
   const [coordinates, setCoordinates] = useState(null);
   
+  const route = useRoute(); 
+//get the value of coordinates and placename from map
+useEffect(() => {
+  if (route.params?.selectedLocation && route.params?.locationText) {
+    // Log the selectedLocation object to see its structure
+    console.log("Selected Location Object: ", route.params.selectedLocation);
+
+    // Handle the passed data as needed
+    const { latitude, longitude } = route.params.selectedLocation || {};  // Extract latitude and longitude
+    const formattedCoordinates = `${latitude}, ${longitude}`;
+
+    setSelectedAddress(route.params.locationText);
+    setCoordinates(formattedCoordinates);  // Set the formatted coordinates
+  }
+}, [route.params]);
+
   const handleDropdownChange = (value) => {
     setIsOthersSelected(value === 'Others');
     setForm({ ...form, description: value });
@@ -228,6 +245,7 @@ const handleSubmitPress = async () => {
           setShowDefaultSubmitButton(false);
           setLocation(null);
           setExactLocation(false);
+          router.push("/screens/chooseFromMap");
         },
         style: "cancel",
       },
@@ -285,14 +303,9 @@ const submitComplaint = async (location) => {
   }
 };
 
-const handleGeocode = async () => {
-  if (!selectedAddress) return;
+const submitComplaintWithSelectedLocation = async () => {
   setUploading(true);
-  const result = await getCoordinatesFromAddress(selectedAddress);
-  if (result) {
-    setCoordinates(result);
-    console.log(coordinates)
-  }
+  
   try {
     const currentDate = new Date();
 
@@ -302,7 +315,7 @@ const handleGeocode = async () => {
       userName: user.$id,
       createdAt: currentDate,
       consumerName: user.name,
-      Location: `${result.latitude}, ${result.longitude}`,
+      Location: coordinates,
       locationName: selectedAddress
     });
 
@@ -438,12 +451,22 @@ const handleGeocode = async () => {
         
           {showLocationField && (
             <>
+  <FormField
+    title="Address"
+    value={selectedAddress}  // Set the value to selectedAddress
+    handleChangeText={(e) => {
+      setForm({ ...form, address: e });
+      setSelectedAddress(e);  // Update selectedAddress when the text changes
+    }}
+    otherStyles="mt-7"
+    placeholderFontSize={5}
+    editable={false} 
+  />
 
-             <GeoSearch onAddressSelected={setSelectedAddress} />
             
             <CustomButtons
             title="Submit"
-            handlePress={handleGeocode}
+            handlePress={submitComplaintWithSelectedLocation}
             containerStyles="mt-7"
             isLoading={uploading}
             className="min-h-[62px]"
