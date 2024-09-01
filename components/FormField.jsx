@@ -11,7 +11,7 @@ const FormField = ({title, value, placeholder, handleChangeText, otherStyles, ..
       items-center flex-row
       ">
         <TextInput
-         className ="w-full flex-1 text-white font-pmedium text-base"
+         className ="w-full flex-1 text-white font-psmall text-base"
          value = {value}
          placeholder={placeholder}
          placeholderTextColor={"#7b7b8b"}

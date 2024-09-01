@@ -6,17 +6,16 @@ import { signOut } from "../../lib/appwrite";
 import { icons } from "../../constants";
 import { router } from 'expo-router';
 import CustomButton from '../../components/CustomButton';
-import { updateUserProfile, updatePassword, updateEmail } from '../../lib/appwrite'; // You will need to implement this function
+import { updateUserProfile, updatePassword, updateEmail } from '../../lib/appwrite';
 
 const Profile = () => {
   const { user, setUser, setIsLoggedIn } = useGlobalContext();
   const [isEditing, setIsEditing] = useState(false);
- 
   const [phone, setPhone] = useState(user ? user.phone : '');
   const [email, setEmail] = useState(user ? user.email : '');
   const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [password, setNewUserPassword] = useState(user ? user.password : '');
+  const [newPassword, setNewUserPassword] = useState(user ? user.password : '');
+
   const logout = async () => {
     await signOut();
     setUser(null);
@@ -26,21 +25,17 @@ const Profile = () => {
 
   const toggleEditMode = async () => {
     if (isEditing) {
-      
       try {
-        const updatedUser = await updateUserProfile(user.$id, { phone, password, email });
+        const updatedUser = await updateUserProfile(user.$id, { phone, password: newPassword, email });
         if (email && email !== user.email) {
           await updateEmail(email, currentPassword);
         }
-       
-        if (password) {
-          await updatePassword(password, currentPassword);
-         
+        if (newPassword) {
+          await updatePassword(newPassword, currentPassword);
         }
         setUser(updatedUser);
       } catch (error) {
         console.error('Failed to update profile:', error);
-        console.error('Failed to update profile:', password);
       }
     }
     setIsEditing(!isEditing);
@@ -50,7 +45,7 @@ const Profile = () => {
     return (
       <SafeAreaView className="bg-primary h-full flex items-center justify-center">
         <ScrollView>
-        <Text className="text-gray-100">Loading...</Text>
+          <Text className="text-gray-100">Loading...</Text>
         </ScrollView>
       </SafeAreaView>
     );
@@ -58,139 +53,118 @@ const Profile = () => {
 
   return (
     <SafeAreaView className="bg-primary h-full">
-      <ScrollView>
-      <View className="w-full  mb-2 px-4">
-        <View className="w-full items-end">
-          <TouchableOpacity onPress={logout} className="flex mb-10">
-            <Image source={icons.logout} resizeMode="contain" className="w-6 h-6" />
-          </TouchableOpacity>
-        </View>
-  
-
-  
-      </View>
-
-
-      <View className="px-4">
-      <Text className="text-xl text-center text-white font-psemibold">
-          Account Information
-        </Text>
-        {!isEditing && (
-        <>
-        <Text className="text text-gray-100 font-pmedium">Name</Text>
-        <View className="w-full mt-1 h-16 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
-          <View className="flex-row justify-between w-full items-center px-4">
-            <View>
-              <Text className="text text-gray-100 font-pmedium">{user.name}</Text>
-
-            </View>
+      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+        <View className="w-full mb-6 px-4">
+          <View className="w-full items-end">
+            <TouchableOpacity onPress={logout} className="flex mb-10">
+              <Image source={icons.logout} resizeMode="contain" className="w-8 h-8" />
+            </TouchableOpacity>
           </View>
-        </View>
 
-        <Text className="text text-gray-100 font-pmedium mt-4">Account number</Text>
-        <View className="w-full mt-1 h-16 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
-          <View className="flex-row justify-between w-full items-center px-4">
-            <View>
-              <Text className="text text-gray-100 font-pmedium">{user.account_number}</Text>
-
-            </View>
-          </View>
-        </View>
-        </>
-      )}
-      {!isEditing && (
-        <>
-          
-        <Text className="text text-gray-100 font-pmedium mt-4">Address</Text>
-        <View className="w-full mt-1 h-16 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
-          <View className="flex-row justify-between w-full items-center px-4">
-            <View>
-              <Text className="text text-gray-100 font-pmedium">{user.city}</Text>
-
-            </View>
-          </View>
-        </View>
-        </>
-      )}
-        
-  
-
-        
-
-        <Text className="text text-gray-100 font-pmedium mt-4">Email</Text>
-        <View className="w-full mt-1 h-16 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
-          <View className="flex w-full justify-center px-4">
-            {isEditing ? (
-              <TextInput
-                className="text w-full text-gray-100 font-pmedium"
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Enter your email"
-                placeholderTextColor="gray"
-              />
-            ) : (
-              <Text className="text text-gray-100 font-pmedium">{email}</Text>
-            )}
-          </View>
-        </View>
-
-        <Text className="text text-gray-100 font-pmedium mt-4">Phone number</Text>
-        <View className="w-full mt-1 h-16 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
-          <View className="flex w-full justify-center px-4">
-            {isEditing ? (
-              <TextInput
-                className="text w-full text-gray-100 font-pmedium"
-                value={phone}
-                onChangeText={setPhone}
-                placeholder="Enter your phone number"
-                placeholderTextColor="gray"
-              />
-            ) : (
-              <Text className="text text-gray-100 font-pmedium">{phone}</Text>
-            )}
-          </View>
-        </View>
-
-      
-        
-
-
-
-        {isEditing && (
-            <>
-              <Text className="text text-gray-100 font-pmedium mt-4">Current Password</Text>
-              <View className="w-full mt-1 h-16 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
-                <View className="flex w-full justify-center px-4">
-                  <TextInput
-                    className="text w-full text-gray-100 font-pmedium"
-                    value={currentPassword}
-                    onChangeText={setCurrentPassword}
-                    placeholder="Enter your current password"
-                    placeholderTextColor="gray"
-                    secureTextEntry
-                  />
-                </View>
+          <View className="flex items-center mb-6">
+              <View className="w-24 h-24 rounded-full bg-black-200 items-center justify-center">
+                <Text className="text-white text-2xl font-bold">
+                  {user.name.charAt(0).toUpperCase()}
+                </Text>
               </View>
+          </View>
 
-              <Text className="text text-gray-100 font-pmedium mt-4">New Password</Text>
-              <View className="w-full w-full mt-1 h-16 bg-black-100 rounded-2xl border-2 border-black-200 flex flex-row justify-between space-x-2">
-                <View className="flex w-full justify-center px-4">
-                  <TextInput
-                    className="text w-full text-gray-100 font-pmedium"
-                    value={password}
-                    onChangeText={setNewUserPassword}
-                    placeholderTextColor="gray"
-                    placeholder="Enter your new password"
-                    secureTextEntry
-                  />
-                </View>
+          <View className="px-4">
+            <Text className="text-lg text-white font-semibold text-center mb-4">Account Information</Text>
+
+            <View className="mb-4">
+              <Text className="text text-gray-200 font-medium">Account Number</Text>
+              <View className="mt-2 h-14 bg-black-200 rounded-xl border border-gray-600 p-4">
+                <Text className="text text-gray-100 font-medium">{user.account_number}</Text>
               </View>
-            </>
-          )}
-                <View className="items-end">
-          <CustomButton title={isEditing ? "Save" : "Edit Profile"} className="mt-3" onPress={toggleEditMode} />
+            </View>
+
+            <View className="mb-4">
+              <Text className="text text-gray-200 font-medium">Address</Text>
+              <View className="mt-2 h-14 bg-black-200 rounded-xl border border-gray-600 p-4">
+                <Text className="text text-gray-100 font-medium">{user.city}</Text>
+              </View>
+            </View>
+
+            <View className="mb-4">
+              <Text className="text text-gray-200 font-medium">Email</Text>
+              <View className="mt-2 h-14 bg-black-200 rounded-xl border border-gray-600 p-4">
+                {isEditing ? (
+                  <TextInput
+                    className="text w-full text-gray-100 font-medium"
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder="Enter your email"
+                    placeholderTextColor="gray"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                ) : (
+                  <Text className="text text-gray-100 font-medium">{email}</Text>
+                )}
+              </View>
+            </View>
+
+            <View className="mb-4">
+              <Text className="text text-gray-200 font-medium">Phone Number</Text>
+              <View className="mt-2 h-14 bg-black-200 rounded-xl border border-gray-600 p-4">
+                {isEditing ? (
+                  <TextInput
+                    className="text w-full text-gray-100 font-medium"
+                    value={phone}
+                    onChangeText={setPhone}
+                    placeholder="Enter your phone number"
+                    placeholderTextColor="gray"
+                    keyboardType="phone-pad"
+                  />
+                ) : (
+                  <Text className="text text-gray-100 font-medium">{phone}</Text>
+                )}
+              </View>
+            </View>
+
+            {isEditing && (
+              <>
+                <View className="mb-4">
+                  <Text className="text text-gray-200 font-medium">Current Password</Text>
+                  <View className="mt-2 h-14 bg-black-200 rounded-xl border border-gray-600 p-4">
+                    <TextInput
+                      className="text w-full text-gray-100 font-medium"
+                      value={currentPassword}
+                      onChangeText={setCurrentPassword}
+                      placeholder="Enter your current password"
+                      placeholderTextColor="gray"
+                      secureTextEntry
+                    />
+                  </View>
+                </View>
+
+                <View className="mb-4">
+                  <Text className="text text-gray-200 font-medium">New Password</Text>
+                  <View className="mt-2 h-14 bg-black-200 rounded-xl border border-gray-600 p-4">
+                    <TextInput
+                      className="text w-full text-gray-100 font-medium"
+                      value={newPassword}
+                      onChangeText={setNewUserPassword}
+                      placeholder="Enter your new password"
+                      placeholderTextColor="gray"
+                      secureTextEntry
+                    />
+                  </View>
+                </View>
+              </>
+            )}
+
+            <View className="mt-6 items-center">
+              <CustomButton 
+                title={isEditing ? "Save" : "Edit Profile"} 
+                className="w-40 rounded-full justify-center items-center shadow-lg"
+                textClassName="text-lg text-white font-semibold"
+                onPress={toggleEditMode} 
+              />
+            </View>
+          </View>
         </View>
-      </View>
       </ScrollView>
     </SafeAreaView>
   );
