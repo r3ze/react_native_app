@@ -30,6 +30,7 @@ const customStyles = {
 const statusMap = {
   New: 1,
   Assigned: 2,
+  'In Progress': 3,
   Resolved: 4,
   Closed: 3,
 };

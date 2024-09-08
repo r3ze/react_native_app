@@ -263,6 +263,8 @@ const submitComplaint = async (location) => {
   setUploading(true);
   try {
     const currentDate = new Date();
+    const offset = currentDate.getTimezoneOffset();
+    const localDate = new Date(currentDate.getTime() - offset * 60 * 1000)
     let placeName = null;
     
     if (location && ExactLocation) {
@@ -277,7 +279,7 @@ const submitComplaint = async (location) => {
     await createComplaint({
       ...form,
       userName: user.$id,
-      createdAt: currentDate,
+      createdAt: localDate,
       consumerName: user.name,
       Location: location ? `${location.latitude}, ${location.longitude}` : '',
       locationName: placeName,
@@ -308,17 +310,18 @@ const submitComplaintWithSelectedLocation = async () => {
   
   try {
     const currentDate = new Date();
-
-  
+    const offset = currentDate.getTimezoneOffset();
+    const localDate = new Date(currentDate.getTime() - offset * 60 * 1000)
+    
     await createComplaint({
       ...form,
       userName: user.$id,
-      createdAt: currentDate,
+      createdAt: localDate,
       consumerName: user.name,
       Location: coordinates,
       locationName: selectedAddress
     });
-
+    console.log(localDate)
     setModalMessage("Complaint submitted successfully");
     setModalVisible(true); // Show the custom modal
     await createLog(user.$id, user.name, currentDate, "Submitted a complaint", user.email, "user");

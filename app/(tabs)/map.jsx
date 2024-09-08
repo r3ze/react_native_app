@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MapView, { Marker, Callout, Geojson, Circle } from 'react-native-maps';
-import { useGlobalContext } from "../../context/GlobalProvider";
+import MapView, { Marker, Callout } from 'react-native-maps';
+import MapViewClustering from 'react-native-map-clustering'; // Import Clustered Map
 import useAppwrite from '../../lib/useAppwrite';
 import { getAllComplaints } from "../../lib/appwrite"; 
 import { Databases, Client } from 'appwrite';
-import serviceAreaGeoJSON from "../../geojson/areas.json";
 
 const Map = () => {
   const { data: complaints, refetch } = useAppwrite(getAllComplaints);
@@ -59,7 +58,13 @@ const Map = () => {
 
   return (
     <SafeAreaView className="bg-primary h-full">
-      <MapView
+         <View style={{ padding: 16, alignItems: 'center' }} className="bg-primary">
+         <Text className="text-2xl text-white font-psemibold">
+         Active Complaints Map
+        </Text>
+
+      </View>
+      <MapViewClustering
         style={{ width: '100%', height: '100%' }}
         initialRegion={{
           latitude: 14.2811,
@@ -67,45 +72,37 @@ const Map = () => {
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
+        // Customize clustering options here
+        radius={30} // Adjust the clustering radius
+        clusterColor="red" // Set the cluster color to red
       >
         {activeComplaints.map((complaint) => {
           const { latitude, longitude } = parseLocation(complaint.Location);
 
           return (
-            <React.Fragment key={complaint.$id}>
-              {/* Circle Marker */}
-              <Circle
-                center={{ latitude, longitude }}
-                radius={5} // Adjust the radius as needed
-                strokeColor="rgba(0, 0, 0, 0.5)" // Dark circle outline
-                fillColor="#ffb09c" // Light color inside the circle
+            <Marker
+              key={complaint.$id}
+              coordinate={{ latitude, longitude }}
+            >
+              <View
+                style={{
+                  height: 12,
+                  width: 12,
+                  borderRadius: 6,
+                  backgroundColor: 'red',
+                  borderColor: 'red',
+                  borderWidth: 1,
+                }}
               />
-              <Marker
-                coordinate={{ latitude, longitude }}
-              >
-                {/* Custom Dot Marker */}
-                <View
-                  style={{
-                    height: 12, // Diameter of the dot
-                    width: 12,
-                    borderRadius: 6, // Radius to make it a circle
-                    backgroundColor: 'red', // Dot color
-                    borderColor: 'red', // Optional border color
-                    borderWidth: 1, // Optional border width
-                  }}
-                />
-                <Callout>
-                  <View>
-                    <Text>{complaint.description}</Text>
-                  </View>
-                </Callout>
-              </Marker>
-            </React.Fragment>
+              <Callout>
+              <View style={{minWidth: 100, width: 150}} className="items-center">
+                <Text>{complaint.description}</Text>
+              </View>
+              </Callout>
+            </Marker>
           );
         })}
-
-       
-      </MapView>
+      </MapViewClustering>
     </SafeAreaView>
   );
 };

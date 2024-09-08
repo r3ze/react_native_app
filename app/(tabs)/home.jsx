@@ -11,26 +11,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons'; 
 import { Client, Databases} from 'appwrite';
 import EmptyState from '../../components/EmptyState';
-// Function to format the date
-function formatDate(createdAt) {
-  const createdAtDate = new Date(createdAt);
-  const currentDate = new Date();
-  const diffInDays = (currentDate - createdAtDate) / (1000 * 60 * 60 * 24);
-  if (diffInDays < 1 && currentDate.getDate() === createdAtDate.getDate()) {
-    return 'today ' + formatTime(createdAtDate);
-  } else if (diffInDays < 2 && currentDate.getDate() - createdAtDate.getDate() === 1) {
-    return 'yesterday ' + formatTime(createdAtDate);
-  } else {
-    const options = { weekday: 'long', hour: 'numeric', minute: 'numeric' };
-    return createdAtDate.toLocaleDateString(undefined, options);
-  }
-}
-
-// Function to format time (HH:MM)
-function formatTime(date) {
-  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-}
-
+import Icon from 'react-native-vector-icons/Feather'; 
 const Home = () => {
   const { user } = useGlobalContext();
   const { data: initialComplaints, refetch } = useAppwrite(() => getUserComplaints(user.$id));
@@ -180,18 +161,12 @@ const Home = () => {
 
   return (
     <SafeAreaView className="bg-primary h-full">
-      <View className="flex-row justify-between items-center px-4 py-2">
-        <View className="flex-row">
-          <Text className="font-pmedium mr-2 text-gray-100" style={{ color: 'gray' }}>Showing</Text>
-          <Text className="font-pmedium text-gray-100" >{filter}</Text>
-        </View>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <View className="flex-row items-center justify-between">
-            <FontAwesome name="filter" size={24} color="gray" />
-            <Text className="font-pmedium text-sm text-gray-100" style={{ color: 'gray' }}>Filters</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
+    
+
+      <View className="items-center w-full">
+              <Text className="text-white font-pbold text-2xl">My Complaints</Text>
+            </View>
+          
 
       <FlatList
         data={filteredComplaints}
@@ -207,13 +182,18 @@ const Home = () => {
             </View>
             <View className="w-full mt-3 h-30 flex flex-row justify-between space-x-2">
               <View className="flex-row px-4">
-                <View className="w-1/5 mr-2 justify-center">
-                  <Image
-                    source={{ uri: item.image }}
-                    className="h-20 w-15"
-                    resizeMode="contain"
-                  />
-                </View>
+              <View className="w-1/5 mr-2 justify-center">
+          {item.image ? (
+            <Image
+              source={{ uri: item.image }}
+              className="h-20 w-15"
+              resizeMode="contain"
+            />
+          ) : (
+            // Display a document icon if no image is available
+            <Icon name="file-text" size={70} color="#cccccc" />
+          )}
+        </View>
                 <View className="flex w-4/5">
                   <Text className="mt-1 text text-white font-pmedium">{item.description}</Text>
                   <Text className="mt-1 text text-gray-100 font-pmedium" style={{ color: 'gray' }}>{item.additionalDetails}</Text>
@@ -238,10 +218,20 @@ const Home = () => {
           </View>
         )}
         ListHeaderComponent={() => (
-          <View className="my-6 px-4 space-y-6">
-            <View className="items-center w-full">
-              <Text className="text-white font-pbold text-2xl">My Complaints</Text>
-            </View>
+          <View className="">
+              <View className="flex-row justify-between items-center px-4 py-2">
+              
+              <View className="flex-row">
+          <Text className="font-pmedium mr-2 text-gray-100" style={{ color: 'gray' }}>Showing</Text>
+          <Text className="font-pmedium text-gray-100" >{filter}</Text>
+        </View>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <View className="flex-row items-center justify-between">
+            <FontAwesome name="filter" size={24} color="gray" />
+            <Text className="font-pmedium text-sm text-gray-100" style={{ color: 'gray' }}>Filters</Text>
+          </View>
+        </TouchableOpacity>
+        </View>
           </View>
         )}
 

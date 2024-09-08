@@ -7,8 +7,22 @@
   import { updateComplaintStatus, updateComplaintStatusToWithdrawn } from '../../lib/appwrite';
   import Stepper from '../(screens)/Stepper';
   import { Client} from 'appwrite';
-
- 
+  import dayjs from 'dayjs';
+  import relativeTime from 'dayjs/plugin/relativeTime';
+  import isToday from 'dayjs/plugin/isToday';
+  import isYesterday from 'dayjs/plugin/isYesterday';
+  import utc from 'dayjs/plugin/utc';
+  import timezone from 'dayjs/plugin/timezone';
+  import Icon from 'react-native-vector-icons/Ionicons';
+  import { Ionicons } from '@expo/vector-icons'; 
+  import {  router } from "expo-router";
+  import ImageEmptyState from '../../components/ImageEmptyState';
+  // Add the plugins to dayjs
+dayjs.extend(utc);
+dayjs.extend(timezone);
+  dayjs.extend(relativeTime);
+  dayjs.extend(isToday);
+  dayjs.extend(isYesterday);
 
   const ComplaintDetails = () => {
     const route = useRoute();
@@ -22,6 +36,22 @@
     const [withdrawnStatus, setWithdrawnStatus] = useState(complaint.status === 'Withdrawn');
     const [followUpDisabledDay, setFollowUpDisabledDay] = useState(false);
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+    const [imagePreviewVisible, setImagePreviewVisible] = useState(false); // State to control image preview modal
+    const formattedDate = (createdAt) => {
+      // Convert to your local timezone (optional: set the timezone explicitly if needed)
+      const date = dayjs.utc(createdAt).tz(dayjs.tz.guess()); 
+    
+      if (date.isToday()) {
+        return `Today ${date.format('HH:mm')}`;
+      } else if (date.isYesterday()) {
+        return `Yesterday ${date.format('HH:mm')}`;
+      } else if (date.isBefore(dayjs().subtract(1, 'week'))) {
+        return date.format('MM-DD-YYYY HH:mm');
+      } else {
+        return date.format('dddd HH:mm');
+      }
+    };
+    
 
     useLayoutEffect(() => {
       navigation.setOptions({
@@ -98,51 +128,27 @@
       }
     };
 
-    // Function to format the date
-    function formatDate(date) {
-      const dateObj = new Date(date);
-      const currentDate = new Date();
-
-      const diffInDays = (currentDate - dateObj) / (1000 * 60 * 60 * 24);
-
-      if (diffInDays < 1 && currentDate.getDate() === dateObj.getDate()) {
-        return 'today ' + formatTime(dateObj);
-      } else if (diffInDays < 2 && currentDate.getDate() - dateObj.getDate() === 1) {
-        return 'yesterday ' + formatTime(dateObj);
-      } else if (diffInDays < 7) {
-        const options = { weekday: 'long', hour: 'numeric', minute: 'numeric' };
-        return dateObj.toLocaleDateString(undefined, options);
-      } else {
-        const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
-        return dateObj.toLocaleDateString(undefined, options);
-      }
-    }
-
-    // Function to format time (HH:MM)
-    function formatTime(date) {
-      return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-    }
-
+    
     // Function to generate dynamic labels
     const generateLabels = () => {
       const labels = [
-        { date: formatDate(complaint.createdAt), description: 'Complaint Raised', time: 'Your complaint has been raised.' }
+        { date: formattedDate(complaint.createdAt), description: 'Complaint Raised', time: 'Your complaint has been raised.' }
       ];
 
       labels.push({
-        date: status == 'Assigned' ? formatDate(complaint.assignedAt) : 'Assigned',
+        date: status == 'Assigned' ? formattedDate(complaint.assignedAt) : 'Assigned',
         description: 'Task Assigned',
         time: status == 'Assigned' ? 'Admin has assigned task to the crew.' : 'Task assignment is pending.'
       });
 
       labels.push({
-        date: complaint.comingAt ? formatDate(complaint.comingAt) : 'Pending',
+        date: complaint.comingAt ? formattedDate(complaint.comingAt) : 'Pending',
         description: 'Resolution Team is Coming',
         time: complaint.comingAt ? 'The resolution team is coming.' : 'Resolution team is yet to be dispatched.'
       });
 
       labels.push({
-        date: complaint.resolvedAt ? formatDate(complaint.resolvedAt) : 'Pending',
+        date: complaint.resolvedAt ? formattedDate(complaint.resolvedAt) : 'Pending',
         description: 'Complaint Resolved',
         time: complaint.resolvedAt ? 'Complaint was successfully resolved.' : 'Resolution is pending.'
       });
@@ -163,7 +169,9 @@
     const updateComplaint = async () => {
       const complaintDate = new Date(complaint.createdAt);
       const currentDate = new Date();
-      const diffInHours = (currentDate - complaintDate) / (1000 * 60 * 60);
+      const offset = currentDate.getTimezoneOffset();
+      const localDate = new Date(currentDate.getTime() - offset * 60 * 1000)
+      const diffInHours = (localDate - complaintDate) / (1000 * 60 * 60);
 
       if (complaint.followUp === 'Yes') {
         setModalMessage("Complaint already followed up.");
@@ -204,11 +212,41 @@
       }
     };
 
+    const openImagePreview = () => {
+      setImagePreviewVisible(true);
+    };
+  
+    const closeImagePreview = () => {
+      setImagePreviewVisible(false);
+    };
+
+    const back = () =>{
+      navigation.navigate('(tabs)', {
+        screen: 'home',
+     
+      });
+      }
+    
 
     return (
       <SafeAreaView className="h-full bg-primary">
         <ScrollView>
+     
           <View style={styles.container}>
+          <TouchableOpacity
+       onPress={back}
+        style={{
+          position: 'absolute',
+          top: 10,
+          left: 10,
+          backgroundColor: 'white',
+          padding: 7,
+          borderRadius: 10,
+
+        }}
+      >
+        <Ionicons name='arrow-back' size={18} color="black"/>
+      </TouchableOpacity>
             <View className="items-center">
             {withdrawnStatus  && (
          <Text className="text-white mt-5" style={styles.title}>Complaint Withdrawn</Text>
@@ -224,18 +262,30 @@
             <View className="flex-row justify-between items-center">
               <Text className="text-white font-pmedium text-xl w-3/5">{complaint.description}</Text>
               <View className="w-2/5 items-end ">
-                <Text className="text-gray-100 " style={styles.text}>{formatDate(complaint.createdAt)}</Text>
+                <Text className="text-gray-100 " style={styles.text}>{formattedDate(complaint.createdAt)}</Text>
               </View>
             </View>
 
             <Text className="text-gray-100 mt-2">{complaint.additionalDetails}</Text>
             <Text className="text-gray-100 mt-2">{complaint.locationName}</Text>
             <View className="items-center mt-5">
-              <Image
-                source={{ uri: complaint.image }}
-                style={styles.image}
-                resizeMode='contain'
+            
+              {complaint.image ? (
+                <TouchableOpacity onPress={openImagePreview}> 
+                 <Image
+                 source={{ uri: complaint.image }}
+                 style={styles.image}
+                 resizeMode='contain'
+               />
+                </TouchableOpacity>
+              ) :(
+                <ImageEmptyState
+                title={"No Image Provided"}
+                subtitle={""}
               />
+              )}
+             
+              
             </View>
        
 
@@ -276,8 +326,8 @@
             <View style={styles.modalContainer}>
               <Text style={styles.modalTitle}>Information</Text>
               <Text style={styles.modalMessage}>{modalMessage}</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
-                <Text style={styles.closeButtonText}>OK</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButtonW}>
+                <Text style={styles.closeButtonTextW}>OK</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -304,6 +354,28 @@
         </View>
       </View>
     </Modal>
+
+
+
+
+     {/* Image Preview Modal */}
+     <Modal
+        transparent={true}
+        animationType="fade"
+        visible={imagePreviewVisible}
+        onRequestClose={closeImagePreview}
+      >
+        <View style={styles.fullScreenOverlay}>
+          <TouchableOpacity style={styles.closeButton} onPress={closeImagePreview}>
+            <Icon name="close-circle" size={30} color="white" />
+          </TouchableOpacity>
+          <Image
+            source={{ uri: complaint.image }}
+            style={styles.fullScreenImage}
+            resizeMode="contain"
+          />
+        </View>
+      </Modal>
       </SafeAreaView>
     );
   };
@@ -353,7 +425,7 @@
       textAlign: 'center',
       marginBottom: 20,
     },
-    closeButton: {
+    closeButtonW: {
       backgroundColor: '#1e90ff',
       paddingVertical: 10,
       paddingHorizontal: 20,
@@ -361,7 +433,7 @@
     
 
     },
-    closeButtonText: {
+    closeButtonTextW: {
       color: '#fff',
       fontSize: 16,
     },
@@ -387,6 +459,23 @@
       color: '#fff',
       fontSize: 16,
       textAlign: 'center',
+    },
+
+    fullScreenOverlay: {
+      flex: 1,
+      backgroundColor: 'black',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    fullScreenImage: {
+      width: '100%',
+      height: '100%',
+    },
+    closeButton: {
+      position: 'absolute',
+      top: 40,
+      right: 20,
+      zIndex: 1,
     },
   });
 

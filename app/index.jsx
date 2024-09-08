@@ -11,7 +11,7 @@ export default function App() {
   const { isLoading, isLoggedIn } = useGlobalContext();
 
   if (!isLoading && isLoggedIn) return <Redirect href="/submit"/>
-  
+  if(!isLoading && !isLoggedIn) return <Redirect href="/sign-in"/>
  
   
   return (  
@@ -26,11 +26,7 @@ export default function App() {
          resizeMode='contain'/>
         
        
-          <CustomButtons
-           title="Continue"
-           handlePress={() => router.push('/sign-in')}
-           containerStyles="w-full mt-7"
-           />
+         
    
     
       </View>

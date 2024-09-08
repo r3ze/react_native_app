@@ -6,7 +6,8 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { Polygon } from 'react-native-maps';
 import * as turf from '@turf/turf';
-
+import { Ionicons } from '@expo/vector-icons'; 
+import {  router } from "expo-router";
 const chooseFromMap = () => {
   const navigation = useNavigation();
   const [selectedLocation, setSelectedLocation] = useState({
@@ -107,6 +108,9 @@ const chooseFromMap = () => {
       setIsCovered(false)
     }
   };
+  const back = () =>{
+  router.replace("/submit")
+  }
 
   const handleConfirmLocation = () => {
     if (isLocationInNonRestrictedArea(selectedLocation.latitude, selectedLocation.longitude)) {
@@ -124,6 +128,21 @@ const chooseFromMap = () => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+
+<TouchableOpacity
+       onPress={back}
+        style={{
+          position: 'absolute',
+          top: 40,
+          left: 10,
+          backgroundColor: 'white',
+          padding: 10,
+          borderRadius: 10,
+          zIndex: 1, // Ensure the button is above the map
+        }}
+      >
+        <Ionicons name='arrow-back' size={24} color="black"/>
+      </TouchableOpacity>
       <MapView
         style={{ flex: 1 }}
         initialRegion={{
