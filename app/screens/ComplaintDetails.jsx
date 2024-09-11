@@ -36,6 +36,7 @@ dayjs.extend(timezone);
     const [withdrawnStatus, setWithdrawnStatus] = useState(complaint.status === 'Withdrawn');
     const [followUpDisabledDay, setFollowUpDisabledDay] = useState(false);
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+    const [labels, setLabels] = useState([]); // Keep track of labels
     const [imagePreviewVisible, setImagePreviewVisible] = useState(false); // State to control image preview modal
     const formattedDate = (createdAt) => {
       // Convert to your local timezone (optional: set the timezone explicitly if needed)
@@ -86,6 +87,11 @@ dayjs.extend(timezone);
               console.log('Update event matched');
               setStatus(updatedComplaint.status);
               setAssignedAt(updatedComplaint.assignedAt);
+
+              complaint.assignedAt = updatedComplaint.assignedAt;
+              complaint.comingAt = updatedComplaint.comingAt;
+              complaint.resolvedAt = updatedComplaint.resolvedAt;
+
               console.log(assignedAt)
               if (updatedComplaint.status === 'Withdrawn') {
                 setWithdrawnStatus(true);
@@ -128,33 +134,7 @@ dayjs.extend(timezone);
       }
     };
 
-    
-    // Function to generate dynamic labels
-    const generateLabels = () => {
-      const labels = [
-        { date: formattedDate(complaint.createdAt), description: 'Complaint Raised', time: 'Your complaint has been raised.' }
-      ];
 
-      labels.push({
-        date: status == 'Assigned' ? formattedDate(complaint.assignedAt) : 'Assigned',
-        description: 'Task Assigned',
-        time: status == 'Assigned' ? 'Admin has assigned task to the crew.' : 'Task assignment is pending.'
-      });
-
-      labels.push({
-        date: complaint.comingAt ? formattedDate(complaint.comingAt) : 'Pending',
-        description: 'Resolution Team is Coming',
-        time: complaint.comingAt ? 'The resolution team is coming.' : 'Resolution team is yet to be dispatched.'
-      });
-
-      labels.push({
-        date: complaint.resolvedAt ? formattedDate(complaint.resolvedAt) : 'Pending',
-        description: 'Complaint Resolved',
-        time: complaint.resolvedAt ? 'Complaint was successfully resolved.' : 'Resolution is pending.'
-      });
-
-      return labels;
-    };
 
     const handleWithdrawPress = () => {
       setConfirmModalVisible(true);
@@ -226,6 +206,33 @@ dayjs.extend(timezone);
      
       });
       }
+
+      useEffect(() => {
+        // Update labels whenever complaint data or status changes
+        const generateLabels = () => {
+          const labelsArray = [
+            { date: formattedDate(complaint.createdAt), description: 'Complaint Raised', time: 'Your complaint has been raised.' },
+            {
+              date: complaint.assignedAt ? formattedDate(complaint.assignedAt) : 'Pending Assignment',
+              description: 'Task Assigned',
+              time: complaint.assignedAt ? 'Admin has assigned task to the crew.' : 'Task assignment is pending.'
+            },
+            {
+              date: complaint.comingAt ? formattedDate(complaint.comingAt) : 'Not Dispatched Yet',
+              description: 'Resolution Team is Coming.',
+              time: complaint.comingAt ? 'The resolution team is coming.' : 'Resolution team is yet to be dispatched.'
+            },
+            {
+              date: complaint.resolvedAt ? formattedDate(complaint.resolvedAt) : 'Not Resolved',
+              description: 'Complaint Resolved',
+              time: complaint.resolvedAt ? 'The complaint has been successfully resolved.' : 'Resolution is still pending.'
+            }
+          ];
+          return labelsArray;
+        };
+    
+        setLabels(generateLabels());
+      }, [complaint, status])
     
 
     return (
@@ -235,17 +242,17 @@ dayjs.extend(timezone);
           <View style={styles.container}>
           <TouchableOpacity
        onPress={back}
+       className="  border-2 border-black-200"
         style={{
           position: 'absolute',
           top: 10,
           left: 10,
-          backgroundColor: 'white',
           padding: 7,
           borderRadius: 10,
 
         }}
       >
-        <Ionicons name='arrow-back' size={18} color="black"/>
+        <Icon name='arrow-back' size={18} color="#FF9001"/>
       </TouchableOpacity>
             <View className="items-center">
             {withdrawnStatus  && (
@@ -292,7 +299,7 @@ dayjs.extend(timezone);
            
 
             {complaint.status !=='Withdrawn' && !withdrawnStatus  && (
-        <Stepper complaintStatus={status} labels={generateLabels()} />
+        <Stepper complaintStatus={status} labels={labels} />
             )}
 
             {status !== 'Resolved' && status !=='Withdrawn' && !withdrawnStatus && (

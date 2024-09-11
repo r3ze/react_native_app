@@ -96,6 +96,7 @@ const Home = () => {
     switch (status) {
       case 'New':
       case 'Assigned':
+      case 'In Progress':
         return <MaterialIcons name="autorenew" size={24} color="#FF9C01" />;
       case 'Resolved':
         return <MaterialIcons name="check-circle" size={24} color="green" />;
@@ -110,6 +111,7 @@ const Home = () => {
     switch (status) {
       case 'New':
       case 'Assigned':
+      case 'In Progress':
         return '#FF9C01';
       case 'Resolved':
         return 'green';
@@ -125,7 +127,7 @@ const Home = () => {
 
   const filteredComplaints = complaints.filter(complaint => {
     if (filter === 'All') return true;
-    if (filter === 'In progress' && (complaint.status === 'New' || complaint.status === 'Assigned')) return true;
+    if (filter === 'In progress' && (complaint.status === 'New' || complaint.status === 'Assigned' || complaint.status ==='In Progress')) return true;
     if (filter === 'Resolved' && complaint.status === 'Resolved') return true;
     if (filter === 'Withdrawn' && complaint.status === 'Withdrawn') return true;
     return false;
