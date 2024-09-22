@@ -1,10 +1,10 @@
   import React, { useLayoutEffect, useEffect, useState } from 'react';
-  import { View, Text, StyleSheet, Image, ScrollView, Modal, TouchableOpacity } from 'react-native';
+  import { View, Text, StyleSheet, Image, ScrollView, Modal, TouchableOpacity, TextInput } from 'react-native';
   import { useRoute } from '@react-navigation/native';
   import { useNavigation } from '@react-navigation/native';
   import { SafeAreaView } from 'react-native-safe-area-context';
   import CustomButton from '../../components/CustomButton';
-  import { updateComplaintStatus, updateComplaintStatusToWithdrawn } from '../../lib/appwrite';
+  import { updateComplaintStatus, updateComplaintStatusToWithdrawn, createLog } from '../../lib/appwrite';
   import Stepper from '../(screens)/Stepper';
   import { Client} from 'appwrite';
   import dayjs from 'dayjs';
@@ -17,6 +17,8 @@
   import { Ionicons } from '@expo/vector-icons'; 
   import {  router } from "expo-router";
   import ImageEmptyState from '../../components/ImageEmptyState';
+  import { useGlobalContext } from "../../context/GlobalProvider";
+  import { RadioButton } from 'react-native-paper';
   // Add the plugins to dayjs
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -26,6 +28,7 @@ dayjs.extend(timezone);
 
   const ComplaintDetails = () => {
     const route = useRoute();
+    const { user } = useGlobalContext();
     const navigation = useNavigation();
     const { complaint } = route.params;
     const [status, setStatus] = useState(complaint.status);
@@ -38,6 +41,8 @@ dayjs.extend(timezone);
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
     const [labels, setLabels] = useState([]); // Keep track of labels
     const [imagePreviewVisible, setImagePreviewVisible] = useState(false); // State to control image preview modal
+    const [selectedReason, setSelectedReason] = useState('');
+    const [otherReason, setOtherReason] = useState('');
     const formattedDate = (createdAt) => {
       // Convert to your local timezone (optional: set the timezone explicitly if needed)
       const date = dayjs.utc(createdAt).tz(dayjs.tz.guess()); 
@@ -140,9 +145,25 @@ dayjs.extend(timezone);
       setConfirmModalVisible(true);
     };
     
-    const confirmWithdrawal = async () => {
+    const confirmWithdrawal = async (reason) => {
+      if (!reason) {
+        console.error('No reason provided for withdrawal.');
+        return;
+      }
+    
+      const withdrawalReason = reason === 'other' ? otherReason : reason;
+    
+      if (withdrawalReason.trim() === "") {
+        console.error('Other reason cannot be empty.');
+        return;
+      }
+      const currentDate = new Date();
+      const offset = currentDate.getTimezoneOffset();
+      const localDate = new Date(currentDate.getTime() - offset * 60 * 1000)
+    
       setConfirmModalVisible(false);
-      await withdrawComplaint();
+      await withdrawComplaint(withdrawalReason);
+      await createLog(user.$id, user.name, localDate, "Withdrawn a complaint", user.email, "user");
     };
     
 
@@ -168,9 +189,9 @@ dayjs.extend(timezone);
       const followUp = "Yes";
       try {
         await updateComplaintStatus(complaint.$id, followUp);
+        await createLog(user.$id, user.name, localDate, "Followed-up a complaint", user.email, "user");
         setModalMessage("Followed-up successfully");
         setModalVisible(true); // Show the custom modal
-        setStatus(followUp); // Update the status state
         setFollowUpDisabled(true); // Disable follow-up after success
         setFollowUpDisabledDay(true); // Disable follow-up after success
 
@@ -179,10 +200,10 @@ dayjs.extend(timezone);
       }
     };
 
-    const withdrawComplaint = async () => {
+    const withdrawComplaint = async (reason) => {
       const status = "Withdrawn";
       try {
-        await updateComplaintStatusToWithdrawn(complaint.$id, status);
+        await updateComplaintStatusToWithdrawn(complaint.$id, status, reason);
         setModalMessage("Withdrawn successfully");
         setModalVisible(true); // Show the custom modal
         setStatus(status); // Update the status state
@@ -215,7 +236,14 @@ dayjs.extend(timezone);
             {
               date: complaint.assignedAt ? formattedDate(complaint.assignedAt) : 'Pending Assignment',
               description: 'Task Assigned',
-              time: complaint.assignedAt ? 'Admin has assigned task to the crew.' : 'Task assignment is pending.'
+              time: complaint.assignedAt
+              ? (
+                <Text>
+                  Admin has assigned task to{' '}
+                  <Text className="font-bold text-secondary">{complaint.crew_name}</Text>
+                </Text>
+              )
+              : 'Task assignment is pending.'
             },
             {
               date: complaint.comingAt ? formattedDate(complaint.comingAt) : 'Not Dispatched Yet',
@@ -234,7 +262,27 @@ dayjs.extend(timezone);
         setLabels(generateLabels());
       }, [complaint, status])
     
-
+      function formatDateRange(startDateStr, endDateStr) {
+        try {
+            // Convert string to Date objects, assuming input is in 'YYYY-MM-DD' format
+            const startDate = new Date(startDateStr);
+            const endDate = new Date(endDateStr);
+    
+            const options = { month: 'long', day: 'numeric' }; // e.g., September 21
+    
+            // Check if the month is the same
+            if (startDate.getMonth() === endDate.getMonth()) {
+                return `${startDate.toLocaleDateString('en-US', options)} - ${endDate.getDate()}`;
+            } else {
+                // Different months
+                return `${startDate.toLocaleDateString('en-US', options)} - ${endDate.toLocaleDateString('en-US', options)}`;
+            }
+        } catch (error) {
+            console.error('Error formatting date range:', error);
+            return 'Invalid Date';
+        }
+    }
+    
     return (
       <SafeAreaView className="h-full bg-primary">
         <ScrollView>
@@ -255,25 +303,26 @@ dayjs.extend(timezone);
         <Icon name='arrow-back' size={18} color="#FF9001"/>
       </TouchableOpacity>
             <View className="items-center">
-            {withdrawnStatus  && (
-         <Text className="text-white mt-5" style={styles.title}>Complaint Withdrawn</Text>
-            )}
-            {status ==='Resolved' && !withdrawnStatus && (
-         <Text className="text-white mt-5" style={styles.title}>Complaint Resolved</Text>
-            )}
-                {status !=='Resolved' && status !=='Withdrawn' && !withdrawnStatus && (
-         <Text className="text-white mt-5" style={styles.title}>Complaint In Progress</Text>
-            )}
+            <Text className="text-white mt-2" style={styles.title}>Track Complaint</Text>
+         
+         {(complaint.resolutionStartDate && complaint.resolutionEndDate) ? (
+          <Text className="mb-2">
+          <Text style={{ color: 'gray' }}>Estimated resolution date: </Text>
+          <Text  style={{ color: 'white' }}>{formatDateRange(complaint.resolutionStartDate, complaint.resolutionEndDate)}</Text>
+        </Text>
+         ) :  (
+        <Text className=""></Text>
+         )}
+       
             </View>
 
             <View className="flex-row justify-between items-center">
               <Text className="text-white font-pmedium text-xl w-3/5">{complaint.description}</Text>
               <View className="w-2/5 items-end ">
-                <Text className="text-gray-100 " style={styles.text}>{formattedDate(complaint.createdAt)}</Text>
+                <Text className="text-gray-100 " style={styles.text}></Text>
               </View>
             </View>
 
-            <Text className="text-gray-100 mt-2">{complaint.additionalDetails}</Text>
             <Text className="text-gray-100 mt-2">{complaint.locationName}</Text>
             <View className="items-center mt-5">
             
@@ -294,7 +343,22 @@ dayjs.extend(timezone);
              
               
             </View>
-       
+              
+             {complaint.additionalDetails ? (
+  <View className="mb-4">
+  <Text className="text text-gray-200 font-medium">Additional Details</Text>
+  <View className="mt-2 h-14 bg-black-200 rounded-xl border border-gray-600 p-4">
+    <Text className="text text-gray-100 font-medium">{complaint.additionalDetails}</Text>
+  </View>
+</View>
+
+             ):
+             (
+              <View className="mb-4">
+
+            </View>
+             )} 
+          
 
            
 
@@ -316,11 +380,7 @@ dayjs.extend(timezone);
               </View>
             )}
 
-            {followUpDisabled && (
-              <View className="px-4 w-full flex-row justify-center mt-3">
-                <Text className="text-gray-100">Complaint already followed up</Text>
-              </View>
-            )}
+
           </View>
         </ScrollView>
         <Modal
@@ -346,20 +406,57 @@ dayjs.extend(timezone);
       visible={confirmModalVisible}
       onRequestClose={() => setConfirmModalVisible(false)}
     >
-      <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Confirm Withdrawal</Text>
-          <Text style={styles.modalMessage}>Are you sure you want to withdraw the complaint?</Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <TouchableOpacity onPress={() => setConfirmModalVisible(false)} style={[styles.cancelButton, styles.buttonWidth]}>
-          <Text style={styles.buttonText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={confirmWithdrawal} style={[styles.confirmButton, styles.buttonWidth]}>
-          <Text style={styles.buttonText}>Yes</Text>
-        </TouchableOpacity>
-          </View>
-        </View>
-      </View>
+       {confirmModalVisible && (
+ <View className="flex-1 items-center justify-center bg-black/50">
+ <View className="w-[90%] bg-white p-5 rounded-2xl shadow-lg">
+   <Text className="text-xl font-bold text-gray-800 mb-4">Select Reason for Withdrawal:</Text>
+
+   <RadioButton.Group onValueChange={(value) => setSelectedReason(value)} value={selectedReason}>
+     <View className="flex-row items-center mb-3">
+       <RadioButton value="Issue Resolved" />
+       <Text className="ml-2 text-lg text-gray-700">Issue Resolved</Text>
+     </View>
+     <View className="flex-row items-center mb-3">
+       <RadioButton value="No longer necessary" />
+       <Text className="ml-2 text-lg text-gray-700">No longer necessary</Text>
+     </View>
+     <View className="flex-row items-center mb-3">
+       <RadioButton value="Submitted by mistake" />
+       <Text className="ml-2 text-lg text-gray-700">Submitted by mistake</Text>
+     </View>
+     <View className="flex-row items-center mb-3">
+       <RadioButton value="other" />
+       <Text className="ml-2 text-lg text-gray-700">Other</Text>
+     </View>
+   </RadioButton.Group>
+
+   {selectedReason === 'other' && (
+     <TextInput
+       className="mt-4 p-3 border border-blue-500 rounded-lg text-lg bg-white"
+       placeholder="Please specify your reason"
+       value={otherReason}
+       onChangeText={text => setOtherReason(text)}
+     />
+   )}
+
+   <View className="flex-row justify-between mt-6">
+     <TouchableOpacity
+       onPress={() => setConfirmModalVisible(false)}
+       className="bg-red-500 py-3 px-6 rounded-lg w-[48%]"
+     >
+       <Text className="text-white text-center text-lg">Cancel</Text>
+     </TouchableOpacity>
+     <TouchableOpacity
+       onPress={() => confirmWithdrawal(selectedReason)}
+       className="bg-blue-500 py-3 px-6 rounded-lg w-[48%]"
+     >
+       <Text className="text-white text-center text-lg">Yes</Text>
+     </TouchableOpacity>
+   </View>
+ </View>
+</View>
+    )}
+
     </Modal>
 
 
@@ -396,7 +493,6 @@ dayjs.extend(timezone);
     title: {
       fontSize: 24,
       fontWeight: 'bold',
-      marginBottom: 20,
       color: 'white', // Ensure the text color is white
     },
     text: {

@@ -1,3 +1,6 @@
 1. Forgot password
 3. Service Area Boundaries: Display boundaries of service areas or zones,
  helping consumers understand if they are within a specific coverage area or if they need to contact a different service provider.
+4. Improve map UI
+5. Improve complaint details UI. (add the name of resolution team)
+6. what if the complaint submitted is not aligned with FLECO's

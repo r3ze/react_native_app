@@ -1,16 +1,17 @@
-import { View, Text, FlatList, Image, RefreshControl, TouchableOpacity, Modal, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, FlatList, Image, RefreshControl, TextInput, TouchableOpacity, Modal, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { icons } from "../../constants";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import useAppwrite from '../../lib/useAppwrite';
-import { getUserComplaints, updateComplaintStatusToWithdrawn } from "../../lib/appwrite";
+import { getUserComplaints, updateComplaintStatusToWithdrawn, createLog } from "../../lib/appwrite";
 import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../../components/CustomButton';
 import { FontAwesome } from '@expo/vector-icons'; 
 import { MaterialIcons } from '@expo/vector-icons'; 
 import { Client, Databases} from 'appwrite';
 import EmptyState from '../../components/EmptyState';
+import { RadioButton } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Feather'; 
 const Home = () => {
   const { user } = useGlobalContext();
@@ -20,12 +21,14 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('All');
   const [modalVisible, setModalVisible] = useState(false);
+  const [withdrawModalVisible, setWithdrawModalVisible] = useState(false);
   const [okModalVisible, setOkModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [visibleComplaints, setVisibleComplaints] = useState(4); // State to control the number of visible complaints
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [selectedComplaintId, setSelectedComplaintId] = useState(null);
-  
+  const [selectedReason, setSelectedReason] = useState('');
+  const [otherReason, setOtherReason] = useState('');
   const navigation = useNavigation();
 
 
@@ -139,26 +142,38 @@ const Home = () => {
     setSelectedComplaintId(complaintId)
   };
   
-  const confirmWithdrawal = async () => {
+  const confirmWithdrawal = async ( reason) => {
+    if (!reason) {
+      console.error('No reason provided for withdrawal.');
+      return;
+    }
+  
+    const withdrawalReason = reason === 'other' ? otherReason : reason;
+  
+    if (withdrawalReason.trim() === "") {
+      console.error('Other reason cannot be empty.');
+      return;
+    }
+    const currentDate = new Date();
+    const offset = currentDate.getTimezoneOffset();
+    const localDate = new Date(currentDate.getTime() - offset * 60 * 1000)
+  
     setConfirmModalVisible(false);
-    await withdrawComplaint(selectedComplaintId);
+    await withdrawComplaint(selectedComplaintId, withdrawalReason);
+    await createLog(user.$id, user.name, localDate, "Withdrawn a complaint", user.email, "user");
   };
   
-  const withdrawComplaint = async (complaintId) => {
-    const status = "Withdrawn";
-    try {
-      await updateComplaintStatusToWithdrawn(complaintId, status);
-      setComplaints(prevComplaints =>
-        prevComplaints.map(complaint =>
-          complaint.$id === complaintId ? { ...complaint, status } : complaint
-        )
-      );
-      setModalMessage("Withdrawn successfully");
-      setOkModalVisible(true); // Show the custom modal
-    } catch (error) {
-      console.error('Failed to withdraw complaint: ', error);
-    }
-  };
+ const withdrawComplaint = async (complaintId, reason) => {
+      const status = "Withdrawn";
+      try {
+        await updateComplaintStatusToWithdrawn(complaintId, status, reason);
+        setModalMessage("Withdrawn successfully");
+        setWithdrawModalVisible(true)
+       
+      } catch (error) {
+        console.error('Failed to withdraw complaint: ', error);
+      }
+    };
 
 
   return (
@@ -198,7 +213,13 @@ const Home = () => {
         </View>
                 <View className="flex w-4/5">
                   <Text className="mt-1 text text-white font-pmedium">{item.description}</Text>
-                  <Text className="mt-1 text text-gray-100 font-pmedium" style={{ color: 'gray' }}>{item.additionalDetails}</Text>
+                  {item.additionalDetails ? (
+                     <Text className="mt-1 text text-gray-100 font-pmedium" style={{ color: 'gray' }}>{item.additionalDetails}</Text>
+
+                  ) : (
+                    <Text className="mt-1 text text-gray-100 font-pmedium" style={{ color: 'gray' }}>No description provided.</Text>
+                    
+                  )}
                 </View>
               </View>
             </View>
@@ -269,7 +290,7 @@ const Home = () => {
 
       {complaints.length > visibleComplaints && (
         <TouchableOpacity onPress={() => setVisibleComplaints(complaints.length)}>
-          <Text style={styles.showMoreButton}>Show More</Text>
+          <Text className="text text-secondary font-pmedium text-center">Show More</Text>
         </TouchableOpacity>
       )}
 
@@ -322,21 +343,74 @@ const Home = () => {
       visible={confirmModalVisible}
       onRequestClose={() => setConfirmModalVisible(false)}
     >
-      <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Confirm Withdrawal</Text>
-          <Text style={styles.modalMessage}>Are you sure you want to withdraw the complaint?</Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <TouchableOpacity onPress={() => setConfirmModalVisible(false)} style={[styles.cancelButton, styles.buttonWidth]}>
-          <Text style={styles.buttonText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={confirmWithdrawal} style={[styles.confirmButton, styles.buttonWidth]}>
-          <Text style={styles.buttonText}>Yes</Text>
-        </TouchableOpacity>
-          </View>
-        </View>
-      </View>
+     {confirmModalVisible && (
+ <View className="flex-1 items-center justify-center bg-black/50">
+ <View className="w-[90%] bg-white p-5 rounded-2xl shadow-lg">
+   <Text className="text-xl font-bold text-gray-800 mb-4">Select Reason for Withdrawal:</Text>
+
+   <RadioButton.Group onValueChange={(value) => setSelectedReason(value)} value={selectedReason}>
+     <View className="flex-row items-center mb-3">
+       <RadioButton value="Issue Resolved" />
+       <Text className="ml-2 text-lg text-gray-700">Issue Resolved</Text>
+     </View>
+     <View className="flex-row items-center mb-3">
+       <RadioButton value="No longer necessary" />
+       <Text className="ml-2 text-lg text-gray-700">No longer necessary</Text>
+     </View>
+     <View className="flex-row items-center mb-3">
+       <RadioButton value="Submitted by mistake" />
+       <Text className="ml-2 text-lg text-gray-700">Submitted by mistake</Text>
+     </View>
+     <View className="flex-row items-center mb-3">
+       <RadioButton value="other" />
+       <Text className="ml-2 text-lg text-gray-700">Other</Text>
+     </View>
+   </RadioButton.Group>
+
+   {selectedReason === 'other' && (
+     <TextInput
+       className="mt-4 p-3 border border-blue-500 rounded-lg text-lg bg-white"
+       placeholder="Please specify your reason"
+       value={otherReason}
+       onChangeText={text => setOtherReason(text)}
+     />
+   )}
+
+   <View className="flex-row justify-between mt-6">
+     <TouchableOpacity
+       onPress={() => setConfirmModalVisible(false)}
+       className="bg-red-500 py-3 px-6 rounded-lg w-[48%]"
+     >
+       <Text className="text-white text-center text-lg">Cancel</Text>
+     </TouchableOpacity>
+     <TouchableOpacity
+       onPress={() => confirmWithdrawal(selectedReason)}
+       className="bg-blue-500 py-3 px-6 rounded-lg w-[48%]"
+     >
+       <Text className="text-white text-center text-lg">Yes</Text>
+     </TouchableOpacity>
+   </View>
+ </View>
+</View>
+    )}
     </Modal>
+
+    <Modal
+          transparent={true}
+          animationType="fade"
+          visible={withdrawModalVisible}
+          onRequestClose={() => setWithdrawModalVisible(false)}
+        >
+          <View style={styles.overlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Information</Text>
+              <Text style={styles.modalMessage}>{modalMessage}</Text>
+              <TouchableOpacity onPress={() => setWithdrawModalVisible(false)} style={styles.closeButtonW}>
+                <Text style={styles.closeButtonTextW}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
     </SafeAreaView>
   );
 };
@@ -409,6 +483,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
+  closeButtonW: {
+    backgroundColor: '#1e90ff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  
+
+  },
+  closeButtonTextW: {
+    color: '#fff',
+    fontSize: 16,
+  },
   buttonWidth: {
     width: 100, // Fixed width for buttons
   },

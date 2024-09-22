@@ -287,7 +287,7 @@ const submitComplaint = async (location) => {
 
     setModalMessage("Complaint submitted successfully");
     setModalVisible(true); // Show the custom modal
-    await createLog(user.$id, user.name, currentDate, "Submitted a complaint", user.email, "user");
+    await createLog(user.$id, user.name, localDate, "Submitted a complaint", user.email, "user");
     setShowLocationField(false);
     setExactLocation(true);
   } catch (error) {
@@ -324,7 +324,7 @@ const submitComplaintWithSelectedLocation = async () => {
     console.log(localDate)
     setModalMessage("Complaint submitted successfully");
     setModalVisible(true); // Show the custom modal
-    await createLog(user.$id, user.name, currentDate, "Submitted a complaint", user.email, "user");
+    await createLog(user.$id, user.name, localDate, "Submitted a complaint", user.email, "user");
     setShowLocationField(false);
     setExactLocation(true);
   } catch (error) {

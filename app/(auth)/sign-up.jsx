@@ -17,17 +17,25 @@ const SignUp = () => {
     email:"",
     phone: "",
     accountNumber:"",
+    orNumber: "",
     password: "",
+    confirmPassword: "",
   });
 
   const submit = async () => {
     if(!form.accountNumber || !form.email || !form.password||!form.phone){
       Alert.alert('Error', 'Please fill in all fields')
+      return;
    
+    }
+    if(form.password!==form.confirmPassword)
+    {
+      return Alert.alert('Error', 'Password do not match.')
     }
     setSubmitting(true)
     try {
-      const result = await createUser(form.name, form.email, form.password, form.accountNumber, form.phone)
+      const result = await createUser(form.name, form.email, form.password, form.confirmPassword, form.accountNumber, form.phone, form.orNumber)
+            
       const currentDate = new Date();
       setUser(result);
       setIsLoggedIn(true);
@@ -68,6 +76,13 @@ const SignUp = () => {
   otherStyles="mt-7 "
 
   />
+   <FormField
+  title="Official Receipt (OR) number "
+  value={form.orNumber}
+  handleChangeText={(e) => setForm({ ...form, orNumber: e})}
+  otherStyles="mt-7 "
+
+  />
 
    <FormField
   title="Email"
@@ -89,6 +104,13 @@ const SignUp = () => {
   title="Password"
   value={form.password}
   handleChangeText={(e) => setForm({ ...form, password: e})}
+  otherStyles="mt-7"
+ 
+  />
+  <FormField
+  title="Confirm Password"
+  value={form.confirmPassword}
+  handleChangeText={(e) => setForm({ ...form, confirmPassword: e})}
   otherStyles="mt-7"
  
   />

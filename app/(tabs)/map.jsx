@@ -1,15 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, Animated, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MapView, { Marker, Callout } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import MapViewClustering from 'react-native-map-clustering'; // Import Clustered Map
 import useAppwrite from '../../lib/useAppwrite';
 import { getAllComplaints } from "../../lib/appwrite"; 
 import { Databases, Client } from 'appwrite';
+import * as Animatable from 'react-native-animatable';  // Import Animatable for animation
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import isToday from 'dayjs/plugin/isToday';
+import isYesterday from 'dayjs/plugin/isYesterday';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+// Add the plugins to dayjs
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(relativeTime);
+dayjs.extend(isToday);
+dayjs.extend(isYesterday);
 
 const Map = () => {
   const { data: complaints, refetch } = useAppwrite(getAllComplaints);
   const [activeComplaints, setActiveComplaints] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [filterType, setFilterType] = useState('No Power'); // Default filter to "Power Outage"
 
   // Function to parse location string into latitude and longitude
   const parseLocation = (location) => {
@@ -17,12 +34,14 @@ const Map = () => {
     return { latitude, longitude };
   };
 
-  // Filter complaints to only include active ones (not resolved or withdrawn)
+  // Filter complaints based on the selected type
   useEffect(() => {
     setActiveComplaints(complaints.filter(
-      (complaint) => complaint.status !== 'Resolved' && complaint.status !== 'Withdrawn'
+      (complaint) => 
+        (complaint.status !== 'Resolved' && complaint.status !== 'Withdrawn') && 
+        (filterType === 'No Power' ? complaint.description === 'No Power' : complaint.description !== 'No Power')
     ));
-  }, [complaints]);
+  }, [complaints, filterType]);
 
   // Initialize Appwrite client
   const client = new Client();
@@ -56,14 +75,37 @@ const Map = () => {
     };
   }, [refetch]);
 
+  // Function to handle marker press and show modal
+  const handleMarkerPress = (complaint) => {
+    setSelectedComplaint(complaint); // Set the selected complaint to show its details
+    setModalVisible(true); // Show the modal
+  };
+
+  const formattedDate = (createdAt) => {
+    // Convert to your local timezone (optional: set the timezone explicitly if needed)
+    const date = dayjs.utc(createdAt).tz(dayjs.tz.guess()); 
+  
+    if (date.isToday()) {
+      return `Today ${date.format('HH:mm')}`;
+    } else if (date.isYesterday()) {
+      return `Yesterday ${date.format('HH:mm')}`;
+    } else if (date.isBefore(dayjs().subtract(1, 'week'))) {
+      return date.format('MM-DD-YYYY HH:mm');
+    } else {
+      return date.format('dddd HH:mm');
+    }
+  };
+
   return (
     <SafeAreaView className="bg-primary h-full">
-         <View style={{ padding: 16, alignItems: 'center' }} className="bg-primary">
-         <Text className="text-2xl text-white font-psemibold">
-         Active Complaints Map
+      <View style={{ padding: 16, alignItems: 'center' }} className="bg-primary">
+        <Text className="text-2xl text-white font-psemibold">
+          Active Complaints Map
         </Text>
-
       </View>
+
+ 
+
       <MapViewClustering
         style={{ width: '100%', height: '100%' }}
         initialRegion={{
@@ -72,7 +114,6 @@ const Map = () => {
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
-        // Customize clustering options here
         radius={30} // Adjust the clustering radius
         clusterColor="red" // Set the cluster color to red
       >
@@ -83,6 +124,7 @@ const Map = () => {
             <Marker
               key={complaint.$id}
               coordinate={{ latitude, longitude }}
+              onPress={() => handleMarkerPress(complaint)}
             >
               <View
                 style={{
@@ -94,17 +136,125 @@ const Map = () => {
                   borderWidth: 1,
                 }}
               />
-              <Callout>
-              <View style={{minWidth: 100, width: 150}} className="items-center">
-                <Text>{complaint.description}</Text>
-              </View>
-              </Callout>
             </Marker>
           );
         })}
       </MapViewClustering>
+           {/* Filter Buttons */}
+           <View style={styles.filterContainer}>
+        <TouchableOpacity
+          style={[styles.filterButton, filterType === 'No Power' && styles.activeFilter]}
+          onPress={() => setFilterType('No Power')} // Filter for power outages
+        >
+          <Text style={styles.filterText}>Power Outages</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.filterButton, filterType !== 'No Power' && styles.activeFilter]}
+          onPress={() => setFilterType('Other Complaints')} // Filter for other complaints
+        >
+          <Text style={styles.filterText}>Other Complaints</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Modal for complaint details */}
+      <Modal
+        animationType="slide" // You can change this to "fade" or "none"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)} // Handle modal close
+      >
+        <Animatable.View animation="bounceInUp" style={styles.modalView}> 
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Complaint Details</Text>
+
+            {selectedComplaint && (
+              <>
+                <Text style={styles.modalText}>Description: {selectedComplaint.description}</Text>
+                <Text style={styles.modalText}>Status: {selectedComplaint.status}</Text>
+                <Text style={styles.modalText}>Reported on: {formattedDate(selectedComplaint.createdAt)}</Text>
+              </>
+            )}
+
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)} // Close modal
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </Animatable.View>
+      </Modal>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  filterContainer: {
+    position: 'absolute', // Make the container position absolute
+    top: 100, // Position it from the top (you can adjust this value)
+    left: 0, // Make it stretch from the left to right of the screen
+    right: 0, 
+    flexDirection: 'row', // Display buttons in a row
+    justifyContent: 'center', // Center the buttons horizontally
+    paddingHorizontal: 20, // Add some padding to the sides
+    zIndex: 1, // Ensure the buttons are above the map
+  },
+  filterButton: {
+    backgroundColor: '#E0E0E0',
+
+    padding: 10,
+
+  },
+  activeFilter: {
+    backgroundColor: '#FF9001',
+  },
+  filterText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Transparent background
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'start',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  closeButton: {
+    backgroundColor: '#2196F3',
+    borderRadius: 10,
+    padding: 10,
+    alignSelf: 'center',
+  },
+  closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+});
 
 export default Map;
