@@ -37,7 +37,7 @@ const TabsLayout = () => {
         headerShown:false,
         tabBarIcon: ({color, focused}) =>(
         <TabIcon
-        icon={icons.map}
+        icon={icons.ionMap}
         color={color}
         name="Map"
         focused={focused}
@@ -46,15 +46,15 @@ const TabsLayout = () => {
     }}
 />
     <Tabs.Screen
-    name = "home"
+    name = "complaints"
     options={{
-        title:'Home',
+        title:'Complaints',
         headerShown:false,
         tabBarIcon: ({color, focused}) =>(
         <TabIcon
-        icon={icons.home}
+        icon={icons.tasks}
         color={color}
-        name="Home"
+        name="Complaints"
         focused={focused}
         />
         )

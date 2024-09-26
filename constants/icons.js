@@ -17,6 +17,7 @@ import notification from "../assets/icons/notification.png"
 import repair from "../assets/icons/repair.png"
 import avatar from "../assets/icons/user.png"
 import map from "../assets/icons/map.png"
+import ionMap from "../assets/icons/IonMap.png"
 export default {
   play,
   bookmark,
@@ -36,5 +37,6 @@ export default {
   notification,
   repair,
   avatar,
-  map
+  map,
+  ionMap
 };

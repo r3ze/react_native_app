@@ -34,9 +34,8 @@ const SignIn = () => {
       setIsLoggedIn(true);
 
       const currentDate = new Date();
-      await createLog(result.$id, result.name, currentDate, form.email, "Login", "user")
-      Alert.alert("Success", "User signed in successfully");
-      router.replace("/home");
+      await createLog(result.$id, result.name, currentDate, form.email, "Login", "Consumer")
+      router.replace("/complaints");
 
     } catch (error) {
       Alert.alert("Error", error.message);

@@ -38,7 +38,7 @@ const Map = () => {
   useEffect(() => {
     setActiveComplaints(complaints.filter(
       (complaint) => 
-        (complaint.status !== 'Resolved' && complaint.status !== 'Withdrawn') && 
+        (complaint.status !== 'Resolved' && complaint.status !== 'Withdrawn' && complaint.status!=='Canceled') && 
         (filterType === 'No Power' ? complaint.description === 'No Power' : complaint.description !== 'No Power')
     ));
   }, [complaints, filterType]);

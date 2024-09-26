@@ -163,7 +163,7 @@ dayjs.extend(timezone);
     
       setConfirmModalVisible(false);
       await withdrawComplaint(withdrawalReason);
-      await createLog(user.$id, user.name, localDate, "Withdrawn a complaint", user.email, "user");
+      await createLog(user.$id, user.name, localDate, "Withdrawn a complaint", user.email, "Consumer");
     };
     
 
@@ -189,7 +189,7 @@ dayjs.extend(timezone);
       const followUp = "Yes";
       try {
         await updateComplaintStatus(complaint.$id, followUp);
-        await createLog(user.$id, user.name, localDate, "Followed-up a complaint", user.email, "user");
+        await createLog(user.$id, user.name, localDate, "Followed-up a complaint", user.email, "Consumer");
         setModalMessage("Followed-up successfully");
         setModalVisible(true); // Show the custom modal
         setFollowUpDisabled(true); // Disable follow-up after success
@@ -202,8 +202,11 @@ dayjs.extend(timezone);
 
     const withdrawComplaint = async (reason) => {
       const status = "Withdrawn";
+      const currentDate = new Date();
+      const offset = currentDate.getTimezoneOffset();
+      const localDate = new Date(currentDate.getTime() - offset * 60 * 1000)
       try {
-        await updateComplaintStatusToWithdrawn(complaint.$id, status, reason);
+        await updateComplaintStatusToWithdrawn(complaint.$id, status, reason, localDate);
         setModalMessage("Withdrawn successfully");
         setModalVisible(true); // Show the custom modal
         setStatus(status); // Update the status state
@@ -303,7 +306,20 @@ dayjs.extend(timezone);
         <Icon name='arrow-back' size={18} color="#FF9001"/>
       </TouchableOpacity>
             <View className="items-center">
-            <Text className="text-white mt-2" style={styles.title}>Track Complaint</Text>
+              {(complaint.status =='Canceled') ? (
+                <View>
+   <Text className="text-white mt-2" style={styles.title}>Complaint Invalidated</Text>
+   <View className="items-center">
+   <Text>
+   <Text  style={{ color: 'gray' }}> {complaint.cancellation_reason} - </Text>
+   <Text  style={{ color: 'white' }}> {formattedDate(complaint.canceledAt)}</Text>
+   </Text>
+   </View>
+   </View>
+              ) : (
+                <Text className="text-white mt-2" style={styles.title}>Track Complaint</Text>
+              )}
+         
          
          {(complaint.resolutionStartDate && complaint.resolutionEndDate) ? (
           <Text className="mb-2">
@@ -359,14 +375,11 @@ dayjs.extend(timezone);
             </View>
              )} 
           
-
-           
-
-            {complaint.status !=='Withdrawn' && !withdrawnStatus  && (
+            {complaint.status !=='Withdrawn' && !withdrawnStatus && status!=='Canceled'  && (
         <Stepper complaintStatus={status} labels={labels} />
             )}
 
-            {status !== 'Resolved' && status !=='Withdrawn' && !withdrawnStatus && (
+            {status !== 'Resolved' && status !=='Withdrawn' && status!=='Canceled' && !withdrawnStatus && (
               <View className="px-4 w-full flex-row justify-around mt-3">
                 <CustomButton
                   title="WITHDRAW"

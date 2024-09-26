@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { Modal,View, Text, TextInput, Image, TouchableOpacity, ScrollView, Button } from 'react-native';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGlobalContext } from "../../context/GlobalProvider";
@@ -15,6 +15,8 @@ const Profile = () => {
   const [email, setEmail] = useState(user ? user.email : '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewUserPassword] = useState(user ? user.password : '');
+  const [isModalVisible, setModalVisible] = useState(false); // Modal state
+  const [modalMessage, setModalMessage] = useState(''); // Modal message
 
   const logout = async () => {
     await signOut();
@@ -32,14 +34,22 @@ const Profile = () => {
         }
         if (newPassword) {
           await updatePassword(newPassword, currentPassword);
+          setModalMessage('Password changed successfully!'); // Set success message
+          setModalVisible(true); // Show modal
         }
         setUser(updatedUser);
       } catch (error) {
         console.error('Failed to update profile:', error);
+        setModalMessage('Failed to update password. Please try again.'); // Set error message
+        setModalVisible(true); // Show modal
       }
+    } else {
+      setCurrentPassword(''); // Clear password fields
+      setNewUserPassword('');
     }
     setIsEditing(!isEditing);
   };
+  
 
   if (!user) {
     return (
@@ -71,8 +81,9 @@ const Profile = () => {
 
           <View className="px-4">
             <Text className="text-lg text-white font-semibold text-center mb-4">Account Information</Text>
-
-            <View className="mb-4">
+      {!isEditing && (
+<>
+<View className="mb-4">
               <Text className="text text-gray-200 font-medium">Account Number</Text>
               <View className="mt-2 h-14 bg-black-200 rounded-xl border border-gray-600 p-4">
                 <Text className="text text-gray-100 font-medium">{user.account_number}</Text>
@@ -85,6 +96,9 @@ const Profile = () => {
                 <Text className="text text-gray-100 font-medium">{user.city}</Text>
               </View>
             </View>
+            </>
+      )}
+ 
 
             <View className="mb-4">
               <Text className="text text-gray-200 font-medium">Email</Text>
@@ -155,15 +169,45 @@ const Profile = () => {
               </>
             )}
 
-            <View className="mt-6 items-center">
-              <CustomButton 
-                title={isEditing ? "Save" : "Edit Profile"} 
-                className="w-40 rounded-full justify-center items-center shadow-lg"
-                textClassName="text-lg text-white font-semibold"
-                onPress={toggleEditMode} 
-              />
-            </View>
+<View className="mt-6 items-center flex-row">
+  {/* Save / Edit Profile button */}
+  <CustomButton 
+    title={isEditing ? "Save" : "Edit Profile"} 
+    className="w-40 rounded-full justify-center items-center shadow-lg mr-4"
+    textClassName="text-lg text-white font-semibold"
+    onPress={toggleEditMode} 
+  />
+
+  {/* Cancel button (only shown in editing mode) */}
+  {isEditing && (
+    <CustomButton 
+      title="Cancel" 
+      className="w-40 rounded-full justify-center items-center shadow-lg bg-gray-600"
+      textClassName="text-lg text-white font-semibold"
+      onPress={() => {
+        // Exit edit mode and clear fields
+        setIsEditing(false);
+        setCurrentPassword('');  // Clear current password field
+        setNewUserPassword('');  // Clear new password field
+      }} 
+    />
+  )}
+</View>
           </View>
+                {/* Modal for password change notification */}
+      <Modal
+        transparent={true}
+        visible={isModalVisible}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ width: 300, padding: 20, backgroundColor: 'white', borderRadius: 10 }}>
+            <Text style={{ fontSize: 18, marginBottom: 10 }}>{modalMessage}</Text>
+            <Button title="Close" onPress={() => setModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
         </View>
       </ScrollView>
     </SafeAreaView>

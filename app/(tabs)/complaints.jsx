@@ -13,7 +13,7 @@ import { Client, Databases} from 'appwrite';
 import EmptyState from '../../components/EmptyState';
 import { RadioButton } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Feather'; 
-const Home = () => {
+const complaints = () => {
   const { user } = useGlobalContext();
   const { data: initialComplaints, refetch } = useAppwrite(() => getUserComplaints(user.$id));
   const [complaints, setComplaints] = useState(initialComplaints);
@@ -160,13 +160,16 @@ const Home = () => {
   
     setConfirmModalVisible(false);
     await withdrawComplaint(selectedComplaintId, withdrawalReason);
-    await createLog(user.$id, user.name, localDate, "Withdrawn a complaint", user.email, "user");
+    await createLog(user.$id, user.name, localDate, "Withdrawn a complaint", user.email, "Consumer");
   };
   
  const withdrawComplaint = async (complaintId, reason) => {
       const status = "Withdrawn";
+      const currentDate = new Date();
+      const offset = currentDate.getTimezoneOffset();
+      const localDate = new Date(currentDate.getTime() - offset * 60 * 1000)
       try {
-        await updateComplaintStatusToWithdrawn(complaintId, status, reason);
+        await updateComplaintStatusToWithdrawn(complaintId, status, reason, localDate);
         setModalMessage("Withdrawn successfully");
         setWithdrawModalVisible(true)
        
@@ -223,8 +226,8 @@ const Home = () => {
                 </View>
               </View>
             </View>
-            <View className={`px-4 w-full flex-row ${item.status === 'Resolved' || item.status==='Withdrawn' ? 'justify-end' : 'justify-around'} mt-3`}>
-              {item.status !== 'Resolved' && item.status!== 'Withdrawn'  && (
+            <View className={`px-4 w-full flex-row ${item.status === 'Resolved' || item.status==='Withdrawn' ||item.status==='Canceled' ? 'justify-end' : 'justify-around'} mt-3`}>
+              {item.status !== 'Resolved' && item.status!== 'Withdrawn' &&item.status!=='Canceled'  && (
                 <>
                   <CustomButton title="WITHDRAW" onPress={() => handleWithdrawPress(item.$id)} />
                   <CustomButton title="TRACK" onPress={() => handlePress(item)} />
@@ -235,6 +238,10 @@ const Home = () => {
               )}
 
                {item.status === 'Resolved'  && (
+                <CustomButton title="VIEW" onPress={() => handlePress(item)} />
+              )}
+
+{item.status === 'Canceled'  && (
                 <CustomButton title="VIEW" onPress={() => handlePress(item)} />
               )}
             </View>
@@ -519,4 +526,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Home;
+export default complaints;
