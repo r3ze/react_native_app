@@ -32,9 +32,6 @@ const SignIn = () => {
       const result = await getCurrentUser();
       setUser(result);
       setIsLoggedIn(true);
-
-      const currentDate = new Date();
-      await createLog(result.$id, result.name, currentDate, form.email, "Login", "Consumer")
       router.replace("/complaints");
 
     } catch (error) {
@@ -59,7 +56,7 @@ const SignIn = () => {
         </View>
    <View className ="px-3">
    <FormField
-  title="Email or Account Number"
+  title="Email"
   value={form.email}
   handleChangeText={(e) => setForm({ ...form, email: e})}
   otherStyles="mt-7"
@@ -73,11 +70,7 @@ const SignIn = () => {
   otherStyles="mt-7"
  
   />
-     <View className="px-3 pt-5 flex-row gap-2">
-   <Link href="/forgot-password" className="text-sm text-secondary font-pbold">
-        Forgot Password?
-       </Link>
-       </View>
+
 
     <CustomButtons 
     title="Sign in"

@@ -188,7 +188,7 @@ dayjs.extend(timezone);
 
       const followUp = "Yes";
       try {
-        await updateComplaintStatus(complaint.$id, followUp);
+        await updateComplaintStatus(complaint.$id, followUp, localDate);
         await createLog(user.$id, user.name, localDate, "Followed-up a complaint", user.email, "Consumer");
         setModalMessage("Followed-up successfully");
         setModalVisible(true); // Show the custom modal
@@ -306,7 +306,7 @@ dayjs.extend(timezone);
         <Icon name='arrow-back' size={18} color="#FF9001"/>
       </TouchableOpacity>
             <View className="items-center">
-              {(complaint.status =='Canceled') ? (
+              {(complaint.status =='Invalidated') ? (
                 <View>
    <Text className="text-white mt-2" style={styles.title}>Complaint Invalidated</Text>
    <View className="items-center">
@@ -375,11 +375,11 @@ dayjs.extend(timezone);
             </View>
              )} 
           
-            {complaint.status !=='Withdrawn' && !withdrawnStatus && status!=='Canceled'  && (
+            {complaint.status !=='Withdrawn' && !withdrawnStatus && status!=='Invalidated'  && (
         <Stepper complaintStatus={status} labels={labels} />
             )}
 
-            {status !== 'Resolved' && status !=='Withdrawn' && status!=='Canceled' && !withdrawnStatus && (
+            {status !== 'Resolved' && status !=='Withdrawn' && status!=='Invalidated' && !withdrawnStatus && (
               <View className="px-4 w-full flex-row justify-around mt-3">
                 <CustomButton
                   title="WITHDRAW"

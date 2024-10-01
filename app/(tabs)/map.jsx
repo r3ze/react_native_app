@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,  useCallback  } from 'react';
 import { View, Text, Modal, TouchableOpacity, Animated, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker } from 'react-native-maps';
@@ -13,6 +13,7 @@ import isToday from 'dayjs/plugin/isToday';
 import isYesterday from 'dayjs/plugin/isYesterday';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import { useFocusEffect } from '@react-navigation/native';
 
 // Add the plugins to dayjs
 dayjs.extend(utc);
@@ -38,7 +39,7 @@ const Map = () => {
   useEffect(() => {
     setActiveComplaints(complaints.filter(
       (complaint) => 
-        (complaint.status !== 'Resolved' && complaint.status !== 'Withdrawn' && complaint.status!=='Canceled') && 
+        (complaint.status !== 'Resolved' && complaint.status !== 'Withdrawn' && complaint.status!=='Invalidated') && 
         (filterType === 'No Power' ? complaint.description === 'No Power' : complaint.description !== 'No Power')
     ));
   }, [complaints, filterType]);
@@ -54,6 +55,14 @@ const Map = () => {
     console.error('Failed to initialize Appwrite client:', error);
   }
   const databases = new Databases(client);
+
+    useFocusEffect(
+    useCallback(() => {
+      // Reset the modal visibility and selected complaint
+      setModalVisible(false);
+      setSelectedComplaint(null);
+    }, [])
+  );
 
   // Subscribe to real-time updates
   useEffect(() => {
@@ -158,33 +167,38 @@ const Map = () => {
       </View>
 
       {/* Modal for complaint details */}
-      <Modal
-        animationType="slide" // You can change this to "fade" or "none"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)} // Handle modal close
-      >
-        <Animatable.View animation="bounceInUp" style={styles.modalView}> 
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Complaint Details</Text>
+ <Modal
+  animationType="slide"
+  transparent={true}
+  visible={modalVisible}
+  onRequestClose={() => setModalVisible(false)}
+>
+  <Animatable.View animation="bounceInUp" className="flex-1 justify-center items-center bg-black/60">
+    <View className="bg-white w-4/5 p-5 rounded-lg shadow-lg">
+      <Text className="text-xl font-bold text-center mb-4 text-black">Complaint Details</Text>
+      
+      {selectedComplaint && (
+        <>
+          <Text className="text-base text-gray-600 mb-2">Description: {selectedComplaint.description}</Text>
+          <Text className="text-base text-gray-600 mb-2">Status: {selectedComplaint.status}</Text>
 
-            {selectedComplaint && (
-              <>
-                <Text style={styles.modalText}>Description: {selectedComplaint.description}</Text>
-                <Text style={styles.modalText}>Status: {selectedComplaint.status}</Text>
-                <Text style={styles.modalText}>Reported on: {formattedDate(selectedComplaint.createdAt)}</Text>
-              </>
-            )}
-
+          <Text className="text-base text-gray-600 mb-4">Reported on: {formattedDate(selectedComplaint.createdAt)}</Text>
+        </>
+      )}
+      
+      <View className="flex-row justify-around mt-4">
             <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)} // Close modal
+              className="bg-red-500 py-2 px-4 rounded-lg"
+              onPress={() => setModalVisible(false)}
             >
-              <Text style={styles.closeButtonText}>Close</Text>
+              <Text className="text-white text-center font-medium">Close</Text>
             </TouchableOpacity>
-          </View>
-        </Animatable.View>
-      </Modal>
+
+   
+      </View>
+    </View>
+  </Animatable.View>
+</Modal>
     </SafeAreaView>
   );
 };

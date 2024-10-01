@@ -133,6 +133,7 @@ const complaints = () => {
     if (filter === 'In progress' && (complaint.status === 'New' || complaint.status === 'Assigned' || complaint.status ==='In Progress')) return true;
     if (filter === 'Resolved' && complaint.status === 'Resolved') return true;
     if (filter === 'Withdrawn' && complaint.status === 'Withdrawn') return true;
+    if (filter === 'Invalidated' && complaint.status === 'Invalidated') return true;
     return false;
   }).slice(0, visibleComplaints); // Limit the number of visible complaints
 
@@ -226,8 +227,8 @@ const complaints = () => {
                 </View>
               </View>
             </View>
-            <View className={`px-4 w-full flex-row ${item.status === 'Resolved' || item.status==='Withdrawn' ||item.status==='Canceled' ? 'justify-end' : 'justify-around'} mt-3`}>
-              {item.status !== 'Resolved' && item.status!== 'Withdrawn' &&item.status!=='Canceled'  && (
+            <View className={`px-4 w-full flex-row ${item.status === 'Resolved' || item.status==='Withdrawn' ||item.status==='Invalidated' ? 'justify-end' : 'justify-around'} mt-3`}>
+              {item.status !== 'Resolved' && item.status!== 'Withdrawn' &&item.status!=='Invalidated'  && (
                 <>
                   <CustomButton title="WITHDRAW" onPress={() => handleWithdrawPress(item.$id)} />
                   <CustomButton title="TRACK" onPress={() => handlePress(item)} />
@@ -241,7 +242,7 @@ const complaints = () => {
                 <CustomButton title="VIEW" onPress={() => handlePress(item)} />
               )}
 
-{item.status === 'Canceled'  && (
+{item.status === 'Invalidated'  && (
                 <CustomButton title="VIEW" onPress={() => handlePress(item)} />
               )}
             </View>
@@ -324,6 +325,9 @@ const complaints = () => {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => applyFilter('Withdrawn')}>
             <Text style={styles.modalOption}>Withdrawn</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => applyFilter('Invalidated')}>
+            <Text style={styles.modalOption}>Invalidated</Text>
           </TouchableOpacity>
         </View>
       </Modal>
