@@ -34,13 +34,10 @@ const SignUp = () => {
     }
     setSubmitting(true)
     try {
-      const result = await createUser(form.name, form.email, form.password, form.confirmPassword, form.accountNumber, form.phone, form.orNumber)
-            
-      const currentDate = new Date();
-      setUser(result);
-      setIsLoggedIn(true);
+      const result = await createUser( form.email, form.password, form.confirmPassword, form.accountNumber, form.phone)
+
       
-      router.replace("/submit")
+      router.replace("/sign-in")
       Alert.alert('Account created successfully')
 
 
@@ -76,13 +73,7 @@ const SignUp = () => {
   otherStyles="mt-7 "
 
   />
-   <FormField
-  title="Official Receipt (OR) number "
-  value={form.orNumber}
-  handleChangeText={(e) => setForm({ ...form, orNumber: e})}
-  otherStyles="mt-7 "
 
-  />
 
    <FormField
   title="Email"

@@ -250,8 +250,9 @@ dayjs.extend(timezone);
             },
             {
               date: complaint.comingAt ? formattedDate(complaint.comingAt) : 'Not Dispatched Yet',
-              description: 'Resolution Team is Coming.',
-              time: complaint.comingAt ? 'The resolution team is coming.' : 'Resolution team is yet to be dispatched.'
+              description: 'Resolution Team is Working on the Issue.', 
+              time: complaint.comingAt ? 'The resolution team is currently working on the issue.' : 'Resolution team is yet to be dispatched.'
+              
             },
             {
               date: complaint.resolvedAt ? formattedDate(complaint.resolvedAt) : 'Not Resolved',

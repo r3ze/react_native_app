@@ -71,6 +71,12 @@ const SignIn = () => {
  
   />
 
+  <View className="px-3 pt-5 flex-row gap-2">
+   <Link href="/forgot-password" className="text-sm text-secondary font-pbold">
+        Forgot Password?
+       </Link>
+       </View>
+
 
     <CustomButtons 
     title="Sign in"

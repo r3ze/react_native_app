@@ -1,15 +1,17 @@
-import { View, Text, Alert } from 'react-native'
-import React, { useState, useLayoutEffect } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import FormField from '../../components/FormField'
-import { router } from "expo-router";
-import CustomButtons from '../../components/CustomButtons'
-import { sendPasswordResetEmail } from '../../lib/appwrite'
+import { View, Text, Alert } from 'react-native';
+import React, { useState, useLayoutEffect } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import FormField from '../../components/FormField';
+import { router } from 'expo-router';
+import CustomButtons from '../../components/CustomButtons';
+import { sendPasswordResetEmail } from '../../lib/appwrite';
 import { useNavigation } from '@react-navigation/native';
+
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setSubmitting] = useState(false);
   const navigation = useNavigation();
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: false,
@@ -39,7 +41,9 @@ const ForgotPassword = () => {
     <SafeAreaView className="bg-primary h-full">
       <View className="w-full mt-5 min-h-[85vh] px-3">
         <Text className="text-2xl text-white font-pbold">Forgot Password</Text>
-        <Text className="text-lg text-gray-300 mt-3">Enter your email address and we will send you a link to reset your password.</Text>
+        <Text className="text-lg text-gray-300 mt-3">
+          Enter your email address and we will send you a link to reset your password.
+        </Text>
 
         <FormField
           title="Email"
@@ -55,15 +59,15 @@ const ForgotPassword = () => {
           containerStyles="mt-7"
           isLoading={isSubmitting}
         />
-         <CustomButtons 
+        <CustomButtons 
           title="Cancel"
-          handlePress={()=>router.replace('sign-in')}
+          handlePress={() => router.replace('sign-in')}
           containerStyles="mt-7"
           isLoading={isSubmitting}
         />
       </View>
     </SafeAreaView>
-  )
+  );
 }
 
 export default ForgotPassword;

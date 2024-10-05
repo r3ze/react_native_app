@@ -447,7 +447,7 @@ const submitComplaintWithSelectedLocation = async () => {
             </TouchableOpacity>
             <View className="items-end w-full ">
               <Text className=" text-secondary font-pmedium text-xs ">
-                maximum file size: 50 MB
+              Maximum file size: 50 MB | Allowed file types: JPG, PNG
               </Text>
               </View>
           </View>

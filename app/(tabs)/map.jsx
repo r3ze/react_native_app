@@ -48,8 +48,8 @@ const Map = () => {
   const client = new Client();
   try {
     client
-      .setEndpoint('https://cloud.appwrite.io/v1') // Replace with your Appwrite endpoint
-      .setProject('662248657f5bd3dd103c'); // Replace with your Appwrite project ID
+      .setEndpoint('https://cloud.appwrite.io/v1') 
+      .setProject('662248657f5bd3dd103c'); 
     console.log('Initialized Appwrite client:');
   } catch (error) {
     console.error('Failed to initialize Appwrite client:', error);
