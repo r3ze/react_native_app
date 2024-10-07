@@ -91,6 +91,13 @@ const Profile = () => {
             </View>
 
             <View className="mb-4">
+              <Text className="text text-gray-200 font-medium">Name</Text>
+              <View className="mt-2 h-14 bg-black-200 rounded-xl border border-gray-600 p-4">
+                <Text className="text text-gray-100 font-medium">{user.name}</Text>
+              </View>
+            </View>
+
+            <View className="mb-4">
               <Text className="text text-gray-200 font-medium">Address</Text>
               <View className="mt-2 h-14 bg-black-200 rounded-xl border border-gray-600 p-4">
                 <Text className="text text-gray-100 font-medium">{user.city}</Text>

@@ -11,7 +11,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { createComplaint } from '../../lib/appwrite';
+import { createComplaint, getLastComplaint } from '../../lib/appwrite';
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { useRoute } from '@react-navigation/native';
 import {createLog} from '../../lib/appwrite'
@@ -273,6 +273,21 @@ const submitComplaint = async (location) => {
     else{
       placeName = form.location;
     }
+    const lastComplaint = await getLastComplaint(user.$id);
+
+    if (lastComplaint) {
+      const lastComplaintDate = new Date(lastComplaint.createdAt);
+      const diffInMinutes = (localDate - lastComplaintDate) / (1000 * 60); // Time difference in minutes
+    
+      // Set the rate limit to 2 hours
+      if (diffInMinutes < 120) {
+        setModalMessage(`You need to wait ${120 - Math.floor(diffInMinutes)} more minute(s) before submitting another complaint.`);
+        setModalVisible(true);
+        setUploading(false); // Stop the uploading process
+        return;
+      }
+    }
+
 
     console.log('Submitting complaint with location:', location);
 
@@ -312,6 +327,22 @@ const submitComplaintWithSelectedLocation = async () => {
     const currentDate = new Date();
     const offset = currentDate.getTimezoneOffset();
     const localDate = new Date(currentDate.getTime() - offset * 60 * 1000)
+
+     // Get the last complaint submitted by the user (assumed to be fetched from the database)
+    const lastComplaint = await getLastComplaint(user.$id);
+if (lastComplaint) {
+  const lastComplaintDate = new Date(lastComplaint.createdAt);
+  const diffInMinutes = (localDate - lastComplaintDate) / (1000 * 60); // Time difference in minutes
+
+  // Set the rate limit to 2 hours
+  if (diffInMinutes < 120) {
+    setModalMessage(`You need to wait ${120 - Math.floor(diffInMinutes)} more minute(s) before submitting another complaint.`);
+    setModalVisible(true);
+    setUploading(false); // Stop the uploading process
+    return;
+  }
+}
+
     
     await createComplaint({
       ...form,
