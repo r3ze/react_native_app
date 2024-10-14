@@ -298,6 +298,7 @@ const submitComplaint = async (location) => {
       consumerName: user.name,
       Location: location ? `${location.latitude}, ${location.longitude}` : '',
       locationName: placeName,
+      phone: user.phone
     });
 
     setModalMessage("Complaint submitted successfully");
@@ -350,7 +351,8 @@ if (lastComplaint) {
       createdAt: localDate,
       consumerName: user.name,
       Location: coordinates,
-      locationName: selectedAddress
+      locationName: selectedAddress,
+      phone: user.phone
     });
     console.log(localDate)
     setModalMessage("Complaint submitted successfully");
