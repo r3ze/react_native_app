@@ -13,6 +13,7 @@ import { Client, Databases} from 'appwrite';
 import EmptyState from '../../components/EmptyState';
 import { RadioButton } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Feather'; 
+import dayjs from 'dayjs';
 const complaints = () => {
   const { user } = useGlobalContext();
   const { data: initialComplaints, refetch } = useAppwrite(() => getUserComplaints(user.$id));
@@ -179,7 +180,40 @@ const complaints = () => {
       }
     };
 
-
+    const generateTicketId = (locationName, createdAt) => {
+      const locationMapping = {
+        Cavinti: 'CV',
+        Pagsanjan: 'PG',
+        Lumban: 'LM',
+        Kalayaan: 'KL',
+        Paete: 'PT',
+        Pakil: 'PK', // corrected based on pattern
+        Pangil: 'PN',
+        Siniloan: 'SN',
+        Famy: 'FY',
+        Mabitac: 'MB',
+        'Santa Maria': 'SM',
+      };
+    
+      let locationCode = 'XX'; // Fallback code if location is unknown
+    
+      // Check if the locationName contains any of the mapped location keys
+      for (const [key, code] of Object.entries(locationMapping)) {
+        if (locationName.includes(key)) {
+          locationCode = code;
+          break;
+        }
+      }
+    
+      try {
+        const formattedDate = dayjs(createdAt).format('MM-YYYY');
+        return `TCKT-${locationCode}-${formattedDate}`;
+      } catch (error) {
+        console.error("Invalid date format", error);
+        return `TCKT-${locationCode}-InvalidDate`;
+      }
+    };
+    
   return (
     <SafeAreaView className="bg-primary h-full">
     
@@ -189,18 +223,18 @@ const complaints = () => {
             </View>
           
 
-      <FlatList
-        data={filteredComplaints}
-        keyExtractor={(item) => item.$id}
-        renderItem={({ item }) => (
-          <View className="mb-10">
-            <View className="w-full flex-row justify-between px-4">
-              <View className="flex-row items-center">
-                {getStatusIcon(item.status)}
-                <Text className="text text-secondary font-pmedium" style={{ color: getStatusColor(item.status), marginLeft: 5 }}>{getStatusText(item.status)}</Text>
+        <FlatList
+          data={filteredComplaints}
+          keyExtractor={(item) => item.$id}
+          renderItem={({ item }) => (
+            <View className="mb-10">
+              <View className="w-full flex-row justify-between px-4">
+                <View className="flex-row items-center">
+                  {getStatusIcon(item.status)}
+                  <Text className="text text-secondary font-pmedium" style={{ color: getStatusColor(item.status), marginLeft: 5 }}>{getStatusText(item.status)}</Text>
+                </View>
+                <Text className="text text-gray-100 font-pmedium" style={{ color: 'gray' }}>Ticket ID: {generateTicketId(item.locationName, item.createdAt)}</Text>
               </View>
-              <Text className="text text-gray-100 font-pmedium" style={{ color: 'gray' }}>Ticket ID: {item.$id}</Text>
-            </View>
             <View className="w-full mt-3 h-30 flex flex-row justify-between space-x-2">
               <View className="flex-row px-4">
               <View className="w-1/5 mr-2 justify-center">
