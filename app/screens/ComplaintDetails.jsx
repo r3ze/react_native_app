@@ -380,7 +380,7 @@ dayjs.extend(timezone);
         <Stepper complaintStatus={status} labels={labels} />
             )}
 
-            {status !== 'Resolved' && status !=='Withdrawn' && status!=='Invalidated' && !withdrawnStatus && (
+            { status !== 'In Progress' && status !== 'Resolved' && status !=='Withdrawn' && status!=='Invalidated' && !withdrawnStatus && (
               <View className="px-4 w-full flex-row justify-around mt-3">
                 <CustomButton
                   title="WITHDRAW"

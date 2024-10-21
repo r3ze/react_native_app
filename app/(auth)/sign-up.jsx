@@ -9,6 +9,8 @@ import {getCurrentUser, signIn} from '../../lib/appwrite'
 import { useGlobalContext } from "../../context/GlobalProvider"
 import {createUser} from '../../lib/appwrite'
 import {createLog} from '../../lib/appwrite'
+import AwesomeAlert from 'react-native-awesome-alerts'
+
 const SignUp = () => {
   const { user, setUser, setIsLoggedIn } = useGlobalContext();
   const [isSubmitting, setSubmitting] = useState(false);
@@ -21,28 +23,38 @@ const SignUp = () => {
     password: "",
     confirmPassword: "",
   });
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertTitle, setAlertTitle] = useState("");
 
   const submit = async () => {
     if(!form.accountNumber || !form.email || !form.password||!form.phone){
-      Alert.alert('Error', 'Please fill in all fields')
+      setAlertTitle('Error');
+      setAlertMessage('Please fill in all fields');
+      setShowAlert(true);
       return;
    
     }
     if(form.password!==form.confirmPassword)
     {
-      return Alert.alert('Error', 'Password do not match.')
+      setAlertTitle('Error');
+      setAlertMessage('Passwords do not match.');
+      setShowAlert(true);
+      return
     }
     setSubmitting(true)
     try {
       const result = await createUser( form.email, form.password, form.confirmPassword, form.accountNumber, form.phone)
-
+      setAlertTitle('Success');
+      setAlertMessage('Account created successfully');
+      setShowAlert(true);
       
       router.replace("/sign-in")
-      Alert.alert('Account created successfully')
-
 
     } catch (error) {
-      Alert.alert('Error', error.message)
+      setAlertTitle('Error');
+      setAlertMessage(error.message);
+      setShowAlert(true);
 
     } finally{
       setSubmitting(false)
@@ -119,7 +131,21 @@ const SignUp = () => {
     <Link href="/sign-in" className='text-lg font-psemibold text-secondary'> Sign In</Link>
        </View>
       </View>
-
+{/* AwesomeAlert */}
+<AwesomeAlert
+          show={showAlert}
+          showProgress={false}
+          title={alertTitle}
+          message={alertMessage}
+          closeOnTouchOutside={true}
+          closeOnHardwareBackPress={false}
+          showConfirmButton={true}
+          confirmText="OK"
+          confirmButtonColor="#DD6B55"
+          onConfirmPressed={() => {
+            setShowAlert(false);
+          }}
+        />
     </ScrollView>
    </SafeAreaView>
   )

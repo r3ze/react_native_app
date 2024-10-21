@@ -30,6 +30,7 @@
     "react-native-action-sheet": "^2.2.0",
     "react-native-animatable": "^1.4.0",
     "react-native-appwrite": "^0.2.2",
+    "react-native-awesome-alerts": "^2.0.0",
     "react-native-dotenv": "^3.4.11",
     "react-native-element-dropdown": "^2.10.4",
     "react-native-map-clustering": "^3.4.2",

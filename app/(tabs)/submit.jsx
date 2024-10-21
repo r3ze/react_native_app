@@ -18,6 +18,8 @@ import {createLog} from '../../lib/appwrite'
 import axios from 'axios';
 import GeoSearch from '../geosearch/geoSearch'
 import { useNavigation } from '@react-navigation/native';
+import AwesomeAlert from 'react-native-awesome-alerts'
+
 const complaints = [
   { label: 'No Power', value: 'No Power' },
   { label: 'Defective Meter', value: 'Defective Meter' },
@@ -61,6 +63,9 @@ const submit = () => {
   const [selectedAddress, setSelectedAddress] = useState('');
   const [coordinates, setCoordinates] = useState(null);
   
+  const [showAlert, setShowAlert] = useState(false); // state to control alert visibility
+  const [alertMessage, setAlertMessage] = useState(""); // state to set alert message
+  const [alertTitle, setAlertTitle] = useState("");
   const route = useRoute(); 
 //get the value of coordinates and placename from map
 useEffect(() => {
@@ -217,7 +222,11 @@ const getPlaceName = async (latitude, longitude) => {
 const handleSubmitPress = async () => {
 
   if (form.description === "") {
-    return Alert.alert("Please fill in all fields!");
+    setAlertTitle('Error');
+    setAlertMessage("Please fill in all fields");
+      setShowAlert(true);  // show the alert when form is invalid
+    return 
+    
   }
 
   Alert.alert(
@@ -257,7 +266,10 @@ const handleSubmitPress = async () => {
 const submitComplaint = async (location) => {
 
   if (!location && !showLocationField) {
-    return Alert.alert("Please provide a location!");
+    setAlertTitle('Error');
+    setAlertMessage("Please provide a location.");
+    setShowAlert(true);  // show the alert when form is invalid
+    return 
   }
 
   setUploading(true);
@@ -273,20 +285,6 @@ const submitComplaint = async (location) => {
     else{
       placeName = form.location;
     }
-    const lastComplaint = await getLastComplaint(user.$id);
-
-    if (lastComplaint) {
-      const lastComplaintDate = new Date(lastComplaint.createdAt);
-      const diffInMinutes = (localDate - lastComplaintDate) / (1000 * 60); // Time difference in minutes
-    
-      // Set the rate limit to 2 hours
-      if (diffInMinutes < 120) {
-        setModalMessage(`You need to wait ${120 - Math.floor(diffInMinutes)} more minute(s) before submitting another complaint.`);
-        setModalVisible(true);
-        setUploading(false); // Stop the uploading process
-        return;
-      }
-    }
 
 
     console.log('Submitting complaint with location:', location);
@@ -300,9 +298,9 @@ const submitComplaint = async (location) => {
       locationName: placeName,
       phone: user.phone
     });
-
-    setModalMessage("Complaint submitted successfully");
-    setModalVisible(true); // Show the custom modal
+    setAlertTitle('Success');
+    setAlertMessage("Complaint submitted successfully");
+      setShowAlert(true);  // show the alert when form is invalid
     await createLog(user.$id, user.name, localDate, "Submitted a complaint", user.email, "Consumer");
     setShowLocationField(false);
     setExactLocation(true);
@@ -337,8 +335,9 @@ if (lastComplaint) {
 
   // Set the rate limit to 2 hours
   if (diffInMinutes < 120) {
-    setModalMessage(`You need to wait ${120 - Math.floor(diffInMinutes)} more minute(s) before submitting another complaint.`);
-    setModalVisible(true);
+    setAlertTitle('Error');
+    setAlertMessage(`You need to wait ${120 - Math.floor(diffInMinutes)} more minute(s) before submitting another complaint.`);
+    setShowAlert(true);  // show the alert when form is invalid
     setUploading(false); // Stop the uploading process
     return;
   }
@@ -355,8 +354,9 @@ if (lastComplaint) {
       phone: user.phone
     });
     console.log(localDate)
-    setModalMessage("Complaint submitted successfully");
-    setModalVisible(true); // Show the custom modal
+    setAlertTitle('Success');
+    setAlertMessage("Complaint submitted successfully");
+      setShowAlert(true);  // show the alert when form is invalid
     await createLog(user.$id, user.name, localDate, "Submitted a complaint", user.email, "Consumer");
     setShowLocationField(false);
     setExactLocation(true);
@@ -542,6 +542,23 @@ if (lastComplaint) {
           </View>
         </View>
       </Modal>
+      {/* AwesomeAlert */}
+<AwesomeAlert
+          show={showAlert}
+          showProgress={false}
+          title={alertTitle}
+          message={alertMessage}
+          closeOnTouchOutside={true}
+          closeOnHardwareBackPress={false}
+          showConfirmButton={true}
+          confirmText="OK"
+          confirmButtonColor="#DD6B55"
+          onConfirmPressed={() => {
+            setShowAlert(false);
+          }}
+        />
+
+
     </SafeAreaView>
 
     

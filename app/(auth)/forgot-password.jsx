@@ -6,12 +6,13 @@ import { router } from 'expo-router';
 import CustomButtons from '../../components/CustomButtons';
 import { sendPasswordResetEmail } from '../../lib/appwrite';
 import { useNavigation } from '@react-navigation/native';
-
+import AwesomeAlert from 'react-native-awesome-alerts'
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setSubmitting] = useState(false);
   const navigation = useNavigation();
-
+  const [showAlert, setShowAlert] = useState(false); // state to control alert visibility
+  const [alertMessage, setAlertMessage] = useState(""); // state to set alert message
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: false,
@@ -20,7 +21,8 @@ const ForgotPassword = () => {
 
   const handlePasswordReset = async () => {
     if (email === "") {
-      Alert.alert("Error", "Please enter your email");
+      setAlertMessage("Please enter your email"); // set error message
+      setShowAlert(true); // show alert on error
       return;
     }
 
@@ -28,7 +30,8 @@ const ForgotPassword = () => {
 
     try {
       await sendPasswordResetEmail(email);
-      Alert.alert("Success", "Password reset email sent. Please check your inbox.");
+      setAlertMessage("Password reset email sent. Please check your inbox."); // set error message
+      setShowAlert(true); // show alert on error
       router.replace("/sign-in");
     } catch (error) {
       Alert.alert("Error", error.message);
@@ -66,6 +69,21 @@ const ForgotPassword = () => {
           isLoading={isSubmitting}
         />
       </View>
+        {/* Awesome Alert */}
+        <AwesomeAlert
+        show={showAlert}
+        showProgress={false}
+        title="Error"
+        message={alertMessage}
+        closeOnTouchOutside={true}
+        closeOnHardwareBackPress={false}
+        showConfirmButton={true}
+        confirmText="Close"
+        confirmButtonColor="#DD6B55"
+        onConfirmPressed={() => {
+          setShowAlert(false); // close the alert
+        }}
+      />
     </SafeAreaView>
   );
 }

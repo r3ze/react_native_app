@@ -8,7 +8,7 @@ import CustomButtons from '../../components/CustomButtons'
 import {getCurrentUser, signIn} from '../../lib/appwrite'
 import { useGlobalContext } from "../../context/GlobalProvider"
 import {createLog} from '../../lib/appwrite'
-
+import AwesomeAlert from 'react-native-awesome-alerts'
 
 const SignIn = () => {
  
@@ -18,10 +18,13 @@ const SignIn = () => {
     email: "",
     password: "",
   });
+  const [showAlert, setShowAlert] = useState(false); // state to control alert visibility
+  const [alertMessage, setAlertMessage] = useState(""); // state to set alert message
 
   const submit = async () => {
     if (form.email === "" || form.password === "") {
-      Alert.alert("Error", "Please fill in all fields");
+      setAlertMessage("Please fill in all fields");
+      setShowAlert(true);  // show the alert when form is invalid
     }
 
     setSubmitting(true);
@@ -32,10 +35,12 @@ const SignIn = () => {
       const result = await getCurrentUser();
       setUser(result);
       setIsLoggedIn(true);
+      
       router.replace("/complaints");
 
     } catch (error) {
-      Alert.alert("Error", error.message);
+      setAlertMessage(error.message); // set error message
+      setShowAlert(true); // show alert on errory
     } finally {
       setSubmitting(false);
     }
@@ -92,6 +97,23 @@ const SignIn = () => {
     <Link href="/sign-up" className='text-lg font-psemibold text-secondary'> Sign Up</Link>
        </View>
       </View>
+
+
+ {/* Awesome Alert */}
+ <AwesomeAlert
+        show={showAlert}
+        showProgress={false}
+        title="Error"
+        message={alertMessage}
+        closeOnTouchOutside={true}
+        closeOnHardwareBackPress={false}
+        showConfirmButton={true}
+        confirmText="Close"
+        confirmButtonColor="#DD6B55"
+        onConfirmPressed={() => {
+          setShowAlert(false); // close the alert
+        }}
+      />
 
     </ScrollView>
    </SafeAreaView>

@@ -233,7 +233,7 @@ const complaints = () => {
                   {getStatusIcon(item.status)}
                   <Text className="text text-secondary font-pmedium" style={{ color: getStatusColor(item.status), marginLeft: 5 }}>{getStatusText(item.status)}</Text>
                 </View>
-                <Text className="text text-gray-100 font-pmedium" style={{ color: 'gray' }}>Ticket ID: {generateTicketId(item.locationName, item.createdAt)}</Text>
+                <Text className="text text-gray-100 font-pmedium" style={{ color: 'gray' }}>Ticket ID: {generateTicketId(item.locationName, item.createdAt)}-{item.counter}</Text>
               </View>
             <View className="w-full mt-3 h-30 flex flex-row justify-between space-x-2">
               <View className="flex-row px-4">
